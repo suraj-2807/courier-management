@@ -1,5 +1,6 @@
 import express from 'express'
 import authMiddleware from '../../middlewares/auth.middleware.js'
+import { requireModulePermission } from '../../middlewares/permission.middleware.js'
 import {
   getProducts,
   searchProducts,
@@ -11,12 +12,14 @@ import {
 
 const router = express.Router()
 
-router.get('/search', authMiddleware, searchProducts)
-router.post('/bulk-import', authMiddleware, bulkImportProducts)
+// ── Read Access ──
+router.get('/search', authMiddleware, requireModulePermission('products'), searchProducts)
+router.get('/', authMiddleware, requireModulePermission('products'), getProducts)
 
-router.get('/', authMiddleware, getProducts)
-router.post('/', authMiddleware, createProduct)
-router.put('/:id', authMiddleware, updateProduct)
-router.delete('/:id', authMiddleware, deleteProduct)
+// ── Mutation Access ──
+router.post('/bulk-import', authMiddleware, requireModulePermission('products'), bulkImportProducts)
+router.post('/', authMiddleware, requireModulePermission('products'), createProduct)
+router.put('/:id', authMiddleware, requireModulePermission('products'), updateProduct)
+router.delete('/:id', authMiddleware, requireModulePermission('products'), deleteProduct)
 
 export default router

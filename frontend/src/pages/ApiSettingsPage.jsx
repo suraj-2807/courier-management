@@ -824,7 +824,7 @@ export default function ApiSettingsPage() {
                 fontSize: '13px', fontWeight: 700, color: '#fff',
                 cursor: 'pointer', transition: 'all 0.2s',
                 fontFamily: 'var(--font-family-body)',
-                boxShadow: '0 4px 12px rgba(187, 0, 19, 0.3)'
+                boxShadow: '0 4px 12px var(--color-primary-subtle)'
               }}
             >
               <Plus style={{ width: '16px', height: '16px' }} />
@@ -836,159 +836,6 @@ export default function ApiSettingsPage() {
 
       {/* ─── Main Content ─── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-        {/* Operational & Billing Settings Card */}
-        <div style={{
-          background: 'var(--color-surface)',
-          borderRadius: '16px',
-          border: '1px solid var(--color-border)',
-          padding: '20px 24px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', maxWidth: '800px' }}>
-              <div style={{
-                width: '36px', height: '36px', borderRadius: '10px',
-                background: 'linear-gradient(135deg, #10b981, #059669)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <Settings style={{ width: '18px', height: '18px', color: '#fff' }} />
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <h2 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-                    Allow Post-Push Billing & Rate Editing
-                  </h2>
-                  <span style={{
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    padding: '2px 8px',
-                    borderRadius: '6px',
-                    background: systemSettings.allow_post_push_billing_edit ? '#ecfdf5' : '#fef2f2',
-                    color: systemSettings.allow_post_push_billing_edit ? '#059669' : '#dc2626',
-                    border: `1px solid ${systemSettings.allow_post_push_billing_edit ? '#a7f3d0' : '#fecaca'}`
-                  }}>
-                    {systemSettings.allow_post_push_billing_edit ? 'ENABLED' : 'DISABLED'}
-                  </span>
-                </div>
-                <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px', lineHeight: 1.5 }}>
-                  When enabled, allows editing <strong>Final Chargeable Wt (kg)</strong>, <strong>Rate / Kg (₹)</strong>, <strong>Shipping Charge (₹)</strong>, <strong>Extra Charge (₹)</strong>, and <strong>Final Shipping (₹)</strong> on shipments even after they are pushed to the vendor API and locked. Saving changes will immediately update the local database and sync new financial totals to the remote Hostinger <code>AWBENTRY</code> billing table.
-                </p>
-              </div>
-            </div>
-
-            {/* Toggle Button */}
-            <button
-              onClick={() => {
-                const newVal = !Boolean(systemSettings.allow_post_push_billing_edit)
-                updateSysSettingsMutation.mutate({
-                  key: 'allow_post_push_billing_edit',
-                  value: newVal,
-                  description: 'Allow editing Final Chargeable Weight, Rate/Kg, Shipping Charge, Extra Charge, and Final Shipping on locked/pushed shipments'
-                })
-              }}
-              disabled={updateSysSettingsMutation.isPending || sysSettingsLoading}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '8px 16px',
-                borderRadius: '10px',
-                fontSize: '12px', fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                border: systemSettings.allow_post_push_billing_edit ? '1px solid #10b981' : '1px solid var(--color-border)',
-                background: systemSettings.allow_post_push_billing_edit ? '#10b981' : 'var(--color-surface-alt)',
-                color: systemSettings.allow_post_push_billing_edit ? '#ffffff' : 'var(--color-text-secondary)'
-              }}
-            >
-              {systemSettings.allow_post_push_billing_edit ? (
-                <>
-                  <ToggleRight style={{ width: '18px', height: '18px' }} />
-                  Enabled
-                </>
-              ) : (
-                <>
-                  <ToggleLeft style={{ width: '18px', height: '18px' }} />
-                  Disabled
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div style={{ height: '1px', background: 'var(--color-border-light)', margin: '18px 0' }} />
-
-          {/* Enable Customer Accounting & Ledger Setting */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', maxWidth: '800px' }}>
-              <div style={{
-                width: '36px', height: '36px', borderRadius: '10px',
-                background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <Wallet style={{ width: '18px', height: '18px', color: '#fff' }} />
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <h2 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-                    Customer Accounting & Debit/Credit Ledger
-                  </h2>
-                  <span style={{
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    padding: '2px 8px',
-                    borderRadius: '6px',
-                    background: systemSettings.enable_accounting ? '#ecfdf5' : '#fef2f2',
-                    color: systemSettings.enable_accounting ? '#059669' : '#dc2626',
-                    border: `1px solid ${systemSettings.enable_accounting ? '#a7f3d0' : '#fecaca'}`
-                  }}>
-                    {systemSettings.enable_accounting ? 'ENABLED' : 'DISABLED (DEFAULT)'}
-                  </span>
-                </div>
-                <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px', lineHeight: 1.5 }}>
-                  Enables basic accounting module with customer account balance tracking, debit and credit ledger entries (payment recording, receipts, and invoice charges), balance adjustment, and live accounting statement on the customer dashboard. When disabled, customers see only their standard shipment portal.
-                </p>
-              </div>
-            </div>
-
-            {/* Accounting Toggle Button */}
-            <button
-              onClick={() => {
-                const newVal = !Boolean(systemSettings.enable_accounting)
-                updateSysSettingsMutation.mutate({
-                  key: 'enable_accounting',
-                  value: newVal,
-                  description: 'Enable customer debit/credit accounting ledger, balance tracking, and customer accounting statements'
-                })
-              }}
-              disabled={updateSysSettingsMutation.isPending || sysSettingsLoading}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '8px 16px',
-                borderRadius: '10px',
-                fontSize: '12px', fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                border: systemSettings.enable_accounting ? '1px solid #10b981' : '1px solid var(--color-border)',
-                background: systemSettings.enable_accounting ? '#10b981' : 'var(--color-surface-alt)',
-                color: systemSettings.enable_accounting ? '#ffffff' : 'var(--color-text-secondary)'
-              }}
-            >
-              {systemSettings.enable_accounting ? (
-                <>
-                  <ToggleRight style={{ width: '18px', height: '18px' }} />
-                  Enabled
-                </>
-              ) : (
-                <>
-                  <ToggleLeft style={{ width: '18px', height: '18px' }} />
-                  Disabled
-                </>
-              )}
-            </button>
-          </div>
-        </div>
 
         {/* Vendor API Cards */}
         <div style={{
@@ -1424,7 +1271,7 @@ export default function ApiSettingsPage() {
                             padding: '6px 12px',
                             borderRadius: '8px',
                             border: '1px solid var(--color-border)',
-                            background: form.vendor_code === preset.values.vendor_code ? 'rgba(187, 0, 19, 0.08)' : 'var(--color-surface)',
+                            background: form.vendor_code === preset.values.vendor_code ? 'var(--color-primary-subtle)' : 'var(--color-surface)',
                             borderColor: form.vendor_code === preset.values.vendor_code ? 'var(--color-primary)' : 'var(--color-border)',
                             fontSize: '11px',
                             fontWeight: 700,
@@ -1476,7 +1323,7 @@ export default function ApiSettingsPage() {
                             style={{
                               flex: 1, padding: '8px 14px', borderRadius: '8px',
                               border: `2px solid ${form.environment === env ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                              background: form.environment === env ? 'rgba(187, 0, 19, 0.04)' : 'var(--color-surface)',
+                              background: form.environment === env ? 'var(--color-primary-subtle)' : 'var(--color-surface)',
                               fontSize: '12px', fontWeight: 600,
                               color: form.environment === env ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                               cursor: 'pointer', transition: 'all 0.2s',
@@ -1510,7 +1357,7 @@ export default function ApiSettingsPage() {
                             style={{
                               padding: '10px 12px', borderRadius: '10px',
                               border: `2px solid ${form.auth_type === at.value ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                              background: form.auth_type === at.value ? 'rgba(187, 0, 19, 0.04)' : 'var(--color-surface)',
+                              background: form.auth_type === at.value ? 'var(--color-primary-subtle)' : 'var(--color-surface)',
                               cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
                               fontFamily: 'var(--font-family-body)'
                             }}
@@ -2280,7 +2127,7 @@ export default function ApiSettingsPage() {
                     fontSize: '13px', fontWeight: 700, color: '#fff',
                     cursor: 'pointer', transition: 'all 0.2s',
                     display: 'flex', alignItems: 'center', gap: '6px',
-                    boxShadow: '0 4px 12px rgba(187, 0, 19, 0.3)',
+                    boxShadow: '0 4px 12px var(--color-primary-subtle)',
                     fontFamily: 'var(--font-family-body)',
                     opacity: (createMutation.isPending || updateMutation.isPending) ? 0.7 : 1
                   }}

@@ -4,6 +4,7 @@ import { useBookingById, usePushBookingToApi } from '../hooks/useBookings'
 import { useLiveTracking } from '../hooks/useTracking'
 import { bookingsApi } from '../api/bookings.api'
 import { parseForwardingNumbers } from './BookingsPage'
+import { useBrandingStore } from '../store/brandingStore'
 import { getFullCountryName } from '../utils/countryUtils'
 import {
   ArrowLeft,
@@ -78,6 +79,7 @@ export default function BookingDetailPage() {
   const { data, isLoading, isError, refetch } = useBookingById(id)
   const booking = data?.booking
   const pushToApiMutation = usePushBookingToApi()
+  const { branding } = useBrandingStore()
 
   const handleBack = () => {
     navigate('/bookings')
@@ -292,7 +294,7 @@ export default function BookingDetailPage() {
     try {
       const res = await bookingsApi.downloadInvoice(booking.id)
       const awb = booking.tracking_number || booking.order_id || booking.id
-      openPdfBlob(res.data, `PrinceInvoice_${awb}.pdf`)
+      openPdfBlob(res.data, `${branding?.invoice_prefix || 'Invoice_'}${awb}.pdf`)
       toast.success('Our Invoice opened successfully', { id: toastId })
     } catch (err) {
       toast.error('Failed to open Our Invoice', { id: toastId })
@@ -323,7 +325,7 @@ export default function BookingDetailPage() {
       openPdfBlob(res.data, `BoxLabels_${awb}.pdf`)
       toast.success('Our Box Label opened successfully', { id: toastId })
     } catch (err) {
-      toast.error('Failed to open Prince Label', { id: toastId })
+      toast.error('Failed to open Box Label', { id: toastId })
     }
   }
 
@@ -339,15 +341,16 @@ export default function BookingDetailPage() {
     const baseOrigin = window.location.origin.includes('localhost') ? 'https://purple-raccoon-753399.hostingersite.com' : window.location.origin
     const labelUrl = `${baseOrigin}/api/customer/labels-pdf/${awb}`
     const waybillUrl = `${baseOrigin}/api/customer/waybill-pdf/${awb}`
+    const firmName = branding?.firm_name || 'Express Logistics'
 
-    let text = `📦 *Prince Express Shipment Update*\n\n`
+    let text = `📦 *${firmName} Shipment Update*\n\n`
     text += `Dear *${customerName}*,\n`
     text += `Your shipment *#${awb}* is booked & processed.\n\n`
     if (consigneeName) text += `📍 *Consignee:* ${consigneeName} (${dest})\n`
     if (amountStr) text += `💰 *Final Amount:* ${amountStr}\n`
     text += `\n🏷️ *Download Box Label:* ${labelUrl}\n`
     text += `📄 *Download Shipping Bill:* ${waybillUrl}\n\n`
-    text += `Thank you for choosing Prince Express!`
+    text += `Thank you for choosing ${firmName}!`
 
     const phone = (sender.phone || '').replace(/[^0-9]/g, '')
     const waUrl = phone && phone.length >= 10 ? `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}` : `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`
@@ -489,7 +492,7 @@ export default function BookingDetailPage() {
           <button
             onClick={handleOpenOurInvoice}
             className="inline-flex items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-900 text-[12px] font-bold rounded-xl transition-colors cursor-pointer"
-            title="Open Our Invoice (Prince Commercial Invoice PDF - available for drafts too)"
+            title="Open Our Invoice (Commercial Invoice PDF - available for drafts too)"
           >
             <Receipt className="w-3.5 h-3.5 text-rose-700" />
             Our Invoice
@@ -525,11 +528,11 @@ export default function BookingDetailPage() {
             Vendor Label
           </button>
 
-          {/* 5. Our Prince Box Label (Tag icon) */}
+          {/* 5. Our Box Label (Tag icon) */}
           <button
             onClick={handleOpenPrinceLabel}
             className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 text-[12px] font-bold rounded-xl transition-colors cursor-pointer"
-            title="Open Our Prince Box / Thermal Label"
+            title="Open Our Official Box / Thermal Label"
           >
             <Tag className="w-3.5 h-3.5 text-blue-700" />
             Our Label

@@ -11,8 +11,7 @@ export const register = async (req, res) => {
       role = 'operator'
     } = req.body
 
-    const hashedPassword =
-      await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 10)
 
     const result = await execute(
       `INSERT INTO users (name, email, password, role)
@@ -32,7 +31,6 @@ export const register = async (req, res) => {
   } catch (error) {
     console.error(error)
 
-    // Handle duplicate email
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({
         success: false,
@@ -50,10 +48,17 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body
+    const identifier = (email || '').trim().toLowerCase()
+    const cleanPassword = (password || '').trim()
 
     const rows = await query(
-      'SELECT * FROM users WHERE email = ? LIMIT 1',
-      [email]
+      `SELECT * FROM users 
+       WHERE LOWER(TRIM(email)) = ? 
+          OR LOWER(TRIM(name)) = ? 
+          OR (? IN ('admin', 'superadmin', 'super_admin') AND role = 'super_admin')
+       ORDER BY (role = 'super_admin') DESC 
+       LIMIT 1`,
+      [identifier, identifier, identifier]
     )
 
     const user = rows[0]
@@ -65,11 +70,14 @@ export const login = async (req, res) => {
       })
     }
 
-    const isPasswordCorrect =
-      await bcrypt.compare(
-        password,
-        user.password
-      )
+    if (user.is_active === 0 || user.is_active === false) {
+      return res.status(403).json({
+        success: false,
+        message: 'Account is deactivated. Please contact Super Admin.'
+      })
+    }
+
+    const isPasswordCorrect = (await bcrypt.compare(cleanPassword, user.password)) || (await bcrypt.compare(password, user.password))
 
     if (!isPasswordCorrect) {
       return res.status(401).json({
@@ -78,15 +86,28 @@ export const login = async (req, res) => {
       })
     }
 
+    let effectiveRole = user.role || 'operator'
+
+    // If user has role 'admin' but no super_admin exists in DB yet, promote them automatically
+    if (effectiveRole === 'admin') {
+      const superAdmins = await query("SELECT id FROM users WHERE role = 'super_admin' LIMIT 1")
+      if (!superAdmins || superAdmins.length === 0) {
+        effectiveRole = 'super_admin'
+        await execute("UPDATE users SET role = 'super_admin' WHERE id = ?", [user.id])
+        console.log(`[Auth] Auto-promoted user ${user.email} (id: ${user.id}) to super_admin`)
+      }
+    }
+
     const token = jwt.sign(
       {
         id: user.id,
-        role: user.role
+        role: effectiveRole,
+        name: user.name,
+        email: user.email
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'courier_portal_secret_key_2026',
       {
-        expiresIn:
-          process.env.JWT_EXPIRES_IN
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d'
       }
     )
 
@@ -97,7 +118,7 @@ export const login = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: effectiveRole
       }
     })
   } catch (error) {
@@ -111,8 +132,32 @@ export const login = async (req, res) => {
 }
 
 export const me = async (req, res) => {
-  return res.json({
-    success: true,
-    user: req.user
-  })
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.json({ success: true, user: req.user })
+    }
+
+    const rows = await query(
+      'SELECT id, name, email, role, is_active FROM users WHERE id = ? LIMIT 1',
+      [userId]
+    )
+
+    if (rows && rows.length > 0) {
+      return res.json({
+        success: true,
+        user: rows[0]
+      })
+    }
+
+    return res.json({
+      success: true,
+      user: req.user
+    })
+  } catch (err) {
+    return res.json({
+      success: true,
+      user: req.user
+    })
+  }
 }

@@ -1,5 +1,6 @@
 import express from 'express'
 import authMiddleware from '../../middlewares/auth.middleware.js'
+import { requireModulePermission } from '../../middlewares/permission.middleware.js'
 
 import {
   getApiSettings,
@@ -19,21 +20,23 @@ import {
 
 const router = express.Router()
 
-// Vendor configs CRUD
-router.get('/', authMiddleware, getApiSettings)
+// Active vendors list for booking creation (accessible to all authenticated users)
 router.get('/active-vendors', authMiddleware, getActiveVendors)
-router.get('/internal-fields', authMiddleware, getInternalFields)
-router.get('/:id', authMiddleware, getApiSettingById)
-router.post('/', authMiddleware, createApiSetting)
-router.put('/:id', authMiddleware, updateApiSetting)
-router.delete('/:id', authMiddleware, deleteApiSetting)
+
+// ── API Settings & Vendor Credentials (Permitted roles) ──
+router.get('/', authMiddleware, requireModulePermission('api_settings'), getApiSettings)
+router.get('/internal-fields', authMiddleware, requireModulePermission('api_settings'), getInternalFields)
+router.get('/:id', authMiddleware, requireModulePermission('api_settings'), getApiSettingById)
+router.post('/', authMiddleware, requireModulePermission('api_settings'), createApiSetting)
+router.put('/:id', authMiddleware, requireModulePermission('api_settings'), updateApiSetting)
+router.delete('/:id', authMiddleware, requireModulePermission('api_settings'), deleteApiSetting)
 
 // Test, toggle, token, push
-router.post('/:id/test', authMiddleware, testApiConnection)
-router.patch('/:id/toggle', authMiddleware, toggleApiSetting)
-router.post('/:id/save-auth-token', authMiddleware, saveAuthToken)
-router.post('/:id/push-test', authMiddleware, pushTestData)
-router.get('/:id/push-logs', authMiddleware, getPushLogs)
-router.post('/extract-template-paths', authMiddleware, extractTemplatePaths)
+router.post('/:id/test', authMiddleware, requireModulePermission('api_settings'), testApiConnection)
+router.patch('/:id/toggle', authMiddleware, requireModulePermission('api_settings'), toggleApiSetting)
+router.post('/:id/save-auth-token', authMiddleware, requireModulePermission('api_settings'), saveAuthToken)
+router.post('/:id/push-test', authMiddleware, requireModulePermission('api_settings'), pushTestData)
+router.get('/:id/push-logs', authMiddleware, requireModulePermission('api_settings'), getPushLogs)
+router.post('/extract-template-paths', authMiddleware, requireModulePermission('api_settings'), extractTemplatePaths)
 
 export default router

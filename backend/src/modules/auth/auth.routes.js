@@ -5,11 +5,12 @@ import {
   me
 } from './auth.controller.js'
 
-import authMiddleware from '../../middlewares/auth.middleware.js'
+import authMiddleware, { requireSuperAdmin } from '../../middlewares/auth.middleware.js'
 
 const router = express.Router()
 
-router.post('/register', register)
+// Only Super Admin can register new users
+router.post('/register', requireSuperAdmin, register)
 router.post('/login', login)
 
 router.get('/me', authMiddleware, me)

@@ -30,36 +30,37 @@ export default function Pagination({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 py-3.5 bg-surface rounded-2xl border border-border mt-3 shadow-2xs">
-      {/* Left: Counts and Page Info */}
-      <div className="flex items-center gap-3 text-[13px] text-text-secondary">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-surface rounded-xl border border-border mt-3">
+      {/* Left: Counts */}
+      <div className="flex items-center gap-3 text-[12px] text-text-secondary">
         {currentTotal > 0 ? (
           <span>
-            Showing <span className="font-bold text-text-primary">{startItem}-{endItem}</span> of{' '}
-            <span className="font-bold text-text-primary">{currentTotal}</span> items
+            Showing <span className="font-semibold text-text-primary">{startItem}–{endItem}</span> of{' '}
+            <span className="font-semibold text-text-primary">{currentTotal}</span>
           </span>
         ) : (
           <span>
-            Page <span className="font-bold text-text-primary">{page}</span> of{' '}
-            <span className="font-bold text-text-primary">{Math.max(1, totalPages)}</span>
+            Page <span className="font-semibold text-text-primary">{page}</span> of{' '}
+            <span className="font-semibold text-text-primary">{Math.max(1, totalPages)}</span>
           </span>
         )}
 
-        {/* Limit / View More Box (10, 20, 50, 100) */}
+        {/* Per-page selector */}
         {onLimitChange && (
           <div className="flex items-center gap-1.5 pl-3 border-l border-border">
-            <span className="text-[11.5px] font-medium text-text-tertiary uppercase tracking-wider">Per page:</span>
-            <div className="flex items-center gap-1 bg-surface-hover/80 p-0.5 rounded-lg border border-border/80">
+            <span className="text-[11px] font-medium text-text-tertiary">Rows:</span>
+            <div className="flex items-center gap-0.5 bg-surface-alt p-0.5 rounded-md border border-border-light">
               {limitOptions.map((opt) => (
                 <button
                   key={opt}
                   type="button"
                   onClick={() => onLimitChange(opt)}
-                  className={`px-2 py-0.5 rounded-md text-[11.5px] font-bold transition-all cursor-pointer ${
+                  className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer ${
                     limit === opt
-                      ? 'bg-primary text-white shadow-2xs'
-                      : 'text-text-secondary hover:text-navy hover:bg-surface'
+                      ? 'text-white'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-surface'
                   }`}
+                  style={limit === opt ? { backgroundColor: 'var(--color-primary)' } : undefined}
                 >
                   {opt}
                 </button>
@@ -69,27 +70,28 @@ export default function Pagination({
         )}
       </div>
 
-      {/* Right: Page Navigation */}
+      {/* Right: Navigation */}
       {totalPages > 1 && (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
-            className="p-1.5 rounded-lg hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed text-text-secondary hover:text-navy transition-colors cursor-pointer border border-border/60"
+            className="p-1.5 rounded-md hover:bg-surface-hover disabled:opacity-25 disabled:cursor-not-allowed text-text-secondary hover:text-text-primary transition-colors cursor-pointer border border-border-light"
             title="Previous Page"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-3.5 h-3.5" />
           </button>
 
           {getPageNumbers().map((num) => (
             <button
               key={num}
               onClick={() => onPageChange(num)}
-              className={`w-8 h-8 rounded-lg text-[12.5px] font-bold transition-all cursor-pointer ${
+              className={`w-7 h-7 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${
                 num === page
-                  ? 'bg-primary text-white shadow-xs'
-                  : 'hover:bg-surface-hover text-text-secondary border border-transparent hover:border-border'
+                  ? 'text-white'
+                  : 'hover:bg-surface-hover text-text-secondary border border-transparent hover:border-border-light'
               }`}
+              style={num === page ? { backgroundColor: 'var(--color-primary)' } : undefined}
             >
               {num}
             </button>
@@ -98,10 +100,10 @@ export default function Pagination({
           <button
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
-            className="p-1.5 rounded-lg hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed text-text-secondary hover:text-navy transition-colors cursor-pointer border border-border/60"
+            className="p-1.5 rounded-md hover:bg-surface-hover disabled:opacity-25 disabled:cursor-not-allowed text-text-secondary hover:text-text-primary transition-colors cursor-pointer border border-border-light"
             title="Next Page"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
       )}

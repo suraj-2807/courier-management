@@ -15,8 +15,12 @@ import systemSettingsRoutes from '../modules/systemSettings/systemSettings.route
 import productRoutes from '../modules/products/product.routes.js'
 import customersRoutes from '../modules/customer/customers.routes.js'
 import vendorRateImportRoutes from '../modules/vendorRateImport/vendorRateImport.routes.js'
+import setupRoutes from '../modules/setup/setup.routes.js'
+import usersRoutes from '../modules/users/users.routes.js'
 
 const router = express.Router()
+
+router.use('/setup', setupRoutes)
 
 router.get('/health', (req, res) => {
   return res.json({
@@ -26,6 +30,8 @@ router.get('/health', (req, res) => {
 })
 
 router.use('/auth', authRoutes)
+router.use('/portal-users', usersRoutes)
+router.use('/users', usersRoutes)
 router.use('/senders', senderRoutes)
 router.use('/receivers', receiverRoutes)
 router.use('/bookings', bookingRoutes)

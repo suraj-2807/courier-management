@@ -258,14 +258,14 @@ export async function openVendorDocument(booking, docType = 'document') {
     return true
   } catch (err) {
     if (type.includes('invoice')) {
-      // Fallback: Draft shipments or vendors without custom invoice can open Our Prince Invoice
+      // Fallback: Draft shipments or vendors without custom invoice can open Our Official Invoice
       try {
         const invRes = await bookingsApi.downloadInvoice(booking.id)
-        openPdfBlob(invRes.data, `PrinceInvoice_${awb}.pdf`)
-        toast.success('Opened Prince Official Invoice', { id: toastId })
+        openPdfBlob(invRes.data, `Invoice_${awb}.pdf`)
+        toast.success('Opened Official Invoice', { id: toastId })
         return true
       } catch (invErr) {
-        console.warn('Prince invoice fallback error:', invErr)
+        console.warn('Invoice fallback error:', invErr)
       }
     }
     const msg = err?.response?.data?.message || `No vendor ${docType} available from carrier API for this shipment`

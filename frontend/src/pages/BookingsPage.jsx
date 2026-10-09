@@ -308,7 +308,7 @@ export default function BookingsPage() {
       }
       const filterTag = statusFilter ? `_${statusFilter}` : ''
       const dateTag = new Date().toISOString().split('T')[0]
-      exportShipmentsToExcel(shipmentsToExport, `PrinceExp_Shipments${filterTag}_${dateTag}.xlsx`)
+      exportShipmentsToExcel(shipmentsToExport, `Shipments${filterTag}_${dateTag}.xlsx`)
       toast.success(`Exported ${shipmentsToExport.length} shipments to Excel successfully!`)
     } catch (err) {
       console.error('Export error:', err)
@@ -356,7 +356,7 @@ export default function BookingsPage() {
     try {
       const res = await bookingsApi.downloadInvoice(b.id)
       const awb = b.tracking_number || b.order_id || b.id
-      openPdfBlob(res.data, `PrinceInvoice_${awb}.pdf`)
+      openPdfBlob(res.data, `Invoice_${awb}.pdf`)
       toast.success('Our Invoice opened successfully', { id: toastId })
     } catch (err) {
       toast.error('Failed to open Our Invoice', { id: toastId })
@@ -387,7 +387,7 @@ export default function BookingsPage() {
       openPdfBlob(res.data, `BoxLabels_${awb}.pdf`)
       toast.success('Our Box Label opened successfully', { id: toastId })
     } catch (err) {
-      toast.error('Failed to open Prince Label', { id: toastId })
+      toast.error('Failed to open Box Label', { id: toastId })
     }
   }
 
@@ -1035,7 +1035,7 @@ export default function BookingsPage() {
                             to={`/bookings/${b.id}`}
                             className="group/awb"
                           >
-                            <span className="text-[13px] font-extrabold text-[#BB0013] hover:underline">
+                            <span className="text-[13px] font-mono font-bold text-primary hover:underline">
                               {b.tracking_number || '—'}
                             </span>
                           </Link>
@@ -1202,7 +1202,7 @@ export default function BookingsPage() {
                                 type="button"
                                 onClick={() => handleOpenOurInvoiceRow(b)}
                                 className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                                title="Our Invoice (Prince Commercial Invoice PDF - available for drafts too)"
+                                title="Our Invoice (Commercial Invoice PDF - available for drafts too)"
                               >
                                 <Receipt className="w-4 h-4" />
                               </button>
@@ -1242,7 +1242,7 @@ export default function BookingsPage() {
                                 type="button"
                                 onClick={() => handleOpenPrinceLabelRow(b)}
                                 className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                                title="Our Prince Box / Thermal Label"
+                                title="Our Official Box / Thermal Label"
                               >
                                 <Tag className="w-4 h-4" />
                               </button>

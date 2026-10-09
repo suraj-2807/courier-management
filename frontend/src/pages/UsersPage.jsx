@@ -6,6 +6,8 @@ import { receiversApi } from '../api/receivers.api'
 import { countryCodesApi } from '../api/countryCodes.api'
 import CountryAutocompleteInput from '../components/CountryAutocompleteInput'
 import { getFullCountryName } from '../utils/countryUtils'
+import PortalUsersSection from '../components/users/PortalUsersSection'
+import { useAuthStore } from '../store/authStore'
 import {
   Users,
   Truck,
@@ -50,7 +52,9 @@ const EMPTY_FORM = {
 
 export default function UsersPage() {
   const queryClient = useQueryClient()
-  const [activeTab, setActiveTab] = useState('senders') // 'senders' | 'receivers'
+  const { isSuperAdmin } = useAuthStore()
+  const userIsSuperAdmin = isSuperAdmin()
+  const [activeTab, setActiveTab] = useState('senders') // 'senders' | 'receivers' | 'portal_users'
   const [searchTerm, setSearchTerm] = useState('')
 
   // Modal State
@@ -305,39 +309,43 @@ export default function UsersPage() {
             <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
               <Users className="w-5 h-5" />
             </div>
-            Address Book & Contacts
+            {activeTab === 'portal_users' ? 'Admin & Staff Management' : 'Address Book & Contacts'}
           </h1>
           <p className="text-[13px] text-text-tertiary mt-1">
-            Manage saved senders (shippers) and receivers (consignees) for quick autofill during booking creation.
+            {activeTab === 'portal_users' 
+              ? 'Manage portal accounts, assign roles (Super Admin, Admin, Operator, Viewer), and configure feature access restrictions.' 
+              : 'Manage saved senders (shippers) and receivers (consignees) for quick autofill during booking creation.'}
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <button
-            onClick={() => {
-              setImportData([])
-              setIsImportOpen(true)
-            }}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[13px] font-bold text-navy bg-surface hover:bg-surface-hover border border-border transition-colors shadow-xs cursor-pointer"
-          >
-            <Upload className="w-4 h-4 text-primary" />
-            Import CSV
-          </button>
+        {activeTab !== 'portal_users' && (
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <button
+              onClick={() => {
+                setImportData([])
+                setIsImportOpen(true)
+              }}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[13px] font-bold text-navy bg-surface hover:bg-surface-hover border border-border transition-colors shadow-xs cursor-pointer"
+            >
+              <Upload className="w-4 h-4 text-primary" />
+              Import CSV
+            </button>
 
-          <button
-            onClick={openAddModal}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold text-white bg-primary hover:bg-primary-dark transition-all duration-200 shadow-sm hover:shadow-primary/30 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            Add {activeTab === 'senders' ? 'Sender' : 'Receiver'}
-          </button>
-        </div>
+            <button
+              onClick={openAddModal}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold text-white bg-primary hover:bg-primary-dark transition-all duration-200 shadow-sm hover:shadow-primary/30 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              Add {activeTab === 'senders' ? 'Sender' : 'Receiver'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Tabs & Search Bar ── */}
       <div className="bg-surface rounded-2xl border border-border p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Tabs */}
-        <div className="flex items-center gap-2 bg-surface-alt p-1 rounded-xl border border-border-light self-start">
+        <div className="flex items-center gap-2 bg-surface-alt p-1 rounded-xl border border-border-light self-start flex-wrap">
           <button
             onClick={() => {
               setActiveTab('senders')
@@ -377,31 +385,58 @@ export default function UsersPage() {
               {receivers.length}
             </span>
           </button>
-        </div>
 
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-text-tertiary absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder={`Search ${activeTab === 'senders' ? 'senders' : 'receivers'} by name, phone, company, city...`}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-surface-alt border border-border rounded-xl text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all"
-          />
-          {searchTerm && (
+          {userIsSuperAdmin && (
             <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
+              onClick={() => {
+                setActiveTab('portal_users')
+                setSearchTerm('')
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-bold transition-all cursor-pointer ${
+                activeTab === 'portal_users'
+                  ? 'bg-purple-600 text-white shadow-xs'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-surface'
+              }`}
             >
-              <X className="w-3.5 h-3.5" />
+              <ShieldCheck className="w-4 h-4 text-purple-300" />
+              Admin & Staff Users
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                activeTab === 'portal_users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+              }`}>
+                Master Control
+              </span>
             </button>
           )}
         </div>
+
+        {/* Search */}
+        {activeTab !== 'portal_users' && (
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 text-text-tertiary absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder={`Search ${activeTab === 'senders' ? 'senders' : 'receivers'} by name, phone, company, city...`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-surface-alt border border-border rounded-xl text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* ── Table ── */}
-      <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
+      {/* ── Table or Portal Users Section ── */}
+      {activeTab === 'portal_users' ? (
+        <PortalUsersSection />
+      ) : (
+        <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
         {isLoading ? (
           <div className="py-20 text-center">
             <Loader2 className="w-7 h-7 text-primary animate-spin mx-auto mb-3" />
@@ -542,6 +577,7 @@ export default function UsersPage() {
           </div>
         )}
       </div>
+      )}
 
       {/* ── Add / Edit Modal ── */}
       {isModalOpen && createPortal(

@@ -1,6 +1,7 @@
 import express from 'express'
 import multer from 'multer'
 import authMiddleware from '../../middlewares/auth.middleware.js'
+import { requireModulePermission } from '../../middlewares/permission.middleware.js'
 
 import {
   uploadExcel,
@@ -27,38 +28,27 @@ const router = express.Router()
 // Multer config — store in memory buffer for xlsx parsing
 const upload = multer({ storage: multer.memoryStorage() })
 
-// Upload Excel (filename = "ServiceName CompanyName.xlsx")
-router.post('/upload-excel', authMiddleware, upload.single('file'), uploadExcel)
+// ── Read Access (Permitted roles) ──
+router.get('/companies', authMiddleware, requireModulePermission('rates'), getCompanies)
+router.get('/companies/:companyId/services', authMiddleware, requireModulePermission('rates'), getCompanyServices)
+router.get('/services/:serviceId/rates', authMiddleware, requireModulePermission('rates'), getServiceRates)
+router.get('/services/:serviceId/zones', authMiddleware, requireModulePermission('rates'), getServiceZones)
+router.get('/vendors/:vendorCode/versions', authMiddleware, requireModulePermission('rates'), getVendorVersions)
+router.get('/vendors/:vendorCode/versions/:versionId', authMiddleware, requireModulePermission('rates'), getVendorVersionDetail)
+router.get('/vendors/:vendorCode/versions/:versionId/diff', authMiddleware, requireModulePermission('rates'), getVendorVersionDiff)
+router.get('/vendors/:vendorCode/destinations', authMiddleware, requireModulePermission('rates'), getVendorDestinations)
+router.post('/calculate', authMiddleware, requireModulePermission('rates'), calculateVendorRate)
 
-// Companies
-router.get('/companies', authMiddleware, getCompanies)
-router.delete('/companies/:companyId', authMiddleware, deleteCompany)
+// ── Mutations (upload, update, delete) ──
+router.post('/upload-excel', authMiddleware, requireModulePermission('rates'), upload.single('file'), uploadExcel)
+router.put('/rates/:id', authMiddleware, requireModulePermission('rates'), updateRateEntry)
+router.put('/zones/:id', authMiddleware, requireModulePermission('rates'), updateZoneEntry)
+router.delete('/companies/:companyId', authMiddleware, requireModulePermission('rates'), deleteCompany)
+router.delete('/services/:serviceId', authMiddleware, requireModulePermission('rates'), deleteService)
 
-// Services
-router.get('/companies/:companyId/services', authMiddleware, getCompanyServices)
-router.delete('/services/:serviceId', authMiddleware, deleteService)
-
-// Rate Entries
-router.get('/services/:serviceId/rates', authMiddleware, getServiceRates)
-router.put('/rates/:id', authMiddleware, updateRateEntry)
-
-// Postcode-Zone Mappings
-router.get('/services/:serviceId/zones', authMiddleware, getServiceZones)
-router.put('/zones/:id', authMiddleware, updateZoneEntry)
-
-// ═══════════════════════════════════════════════════════════════════════
-// VENDOR RATE SHEETS (Multi-Sheet Tariff & Versioning — Pacific, etc.)
-// ═══════════════════════════════════════════════════════════════════════
-router.post('/vendors/:vendorCode/upload', authMiddleware, upload.single('file'), uploadVendorRateSheet)
-router.get('/vendors/:vendorCode/versions', authMiddleware, getVendorVersions)
-router.get('/vendors/:vendorCode/versions/:versionId', authMiddleware, getVendorVersionDetail)
-router.put('/vendors/:vendorCode/versions/:versionId/activate', authMiddleware, activateVendorVersion)
-router.get('/vendors/:vendorCode/versions/:versionId/diff', authMiddleware, getVendorVersionDiff)
-router.delete('/vendors/:vendorCode/versions/:versionId', authMiddleware, deleteVendorVersion)
-router.get('/vendors/:vendorCode/destinations', authMiddleware, getVendorDestinations)
-
-// Vendor Rate Calculator
-router.post('/calculate', authMiddleware, calculateVendorRate)
+// Vendor Rate Sheets
+router.post('/vendors/:vendorCode/upload', authMiddleware, requireModulePermission('rates'), upload.single('file'), uploadVendorRateSheet)
+router.put('/vendors/:vendorCode/versions/:versionId/activate', authMiddleware, requireModulePermission('rates'), activateVendorVersion)
+router.delete('/vendors/:vendorCode/versions/:versionId', authMiddleware, requireModulePermission('rates'), deleteVendorVersion)
 
 export default router
-

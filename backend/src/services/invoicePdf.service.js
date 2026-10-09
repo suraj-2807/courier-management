@@ -3,6 +3,7 @@ import bwipjs from 'bwip-js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { getCompanyBranding } from './branding.service.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -13,8 +14,8 @@ if (!fs.existsSync(INVOICES_DIR)) {
   fs.mkdirSync(INVOICES_DIR, { recursive: true })
 }
 
-// Logo path
-const LOGO_PATH = path.join(__dirname, '..', 'assets', 'PRINCE LOGO.png')
+// Fallback logo path
+const FALLBACK_LOGO_PATH = path.join(__dirname, '..', 'assets', 'PRINCE LOGO.png')
 
 /**
  * Convert number to words (Indian format for INR)
@@ -130,9 +131,18 @@ export async function generateInvoicePdf(params) {
   const filePath = path.join(INVOICES_DIR, fileName)
   const relativePath = `uploads/invoices/${fileName}`
 
+  // Load dynamic company branding
+  const branding = await getCompanyBranding()
+  const firmName = (branding.firm_name || 'COURIER SERVICES').toUpperCase()
+  const firmAddress = branding.firm_address || 'Express Hub & Logistics Center'
+  const firmContact = `Phone: ${branding.firm_phone || ''}  |  Website: ${branding.firm_website || ''}`
+  const logoPath = branding.firm_logo_path && fs.existsSync(branding.firm_logo_path) 
+    ? branding.firm_logo_path 
+    : (fs.existsSync(FALLBACK_LOGO_PATH) ? FALLBACK_LOGO_PATH : null)
+
   // Brand Colors
-  const NAVY = '#0D2132'
-  const RED = '#BB0013'
+  const NAVY = branding.color_sidebar === 'dark' ? '#111827' : '#0D2132'
+  const PRIMARY_COLOR = branding.color_primary || '#BB0013'
 
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margins: { top: 25, bottom: 25, left: 30, right: 30 } })
@@ -148,16 +158,16 @@ export async function generateInvoicePdf(params) {
 
     // ─── BRAND LOGO & COMPANY HEADER ───
     doc.rect(leftMargin, y, pageWidth, 55).strokeColor(NAVY).lineWidth(1).stroke()
-    if (fs.existsSync(LOGO_PATH)) {
+    if (logoPath && fs.existsSync(logoPath)) {
       try {
-        doc.image(LOGO_PATH, leftMargin + 8, y + 6, { fit: [50, 42] })
+        doc.image(logoPath, leftMargin + 8, y + 6, { fit: [50, 42] })
       } catch (e) {}
     }
-    doc.fillColor(RED).fontSize(14).font('Helvetica-Bold')
-       .text('PRINCE INTERNATIONAL COURIER SERVICE', leftMargin + 65, y + 8)
+    doc.fillColor(PRIMARY_COLOR).fontSize(13).font('Helvetica-Bold')
+       .text(firmName, leftMargin + 65, y + 8, { width: pageWidth - 75, ellipsis: true })
     doc.fillColor(NAVY).fontSize(7.5).font('Helvetica')
-       .text('Shop No. 4, Al Marhaba Apt Opp. Sai Baba Eye Hospital, Machhlipith B/H Lalagate, Surat-395003.', leftMargin + 65, y + 27)
-       .text('Phone: +91 98987 87199  |  Website: www.princeexp.com', leftMargin + 65, y + 39)
+       .text(firmAddress, leftMargin + 65, y + 25, { width: pageWidth - 75, height: 14, ellipsis: true })
+       .text(firmContact, leftMargin + 65, y + 39, { width: pageWidth - 75, ellipsis: true })
 
     y += 60
 
@@ -343,7 +353,7 @@ export async function generateInvoicePdf(params) {
        .text('We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.', leftMargin + 6, y + 19, { width: pageWidth / 2 - 14, lineGap: 1.5 })
     
     doc.fillColor(NAVY).fontSize(8).font('Helvetica-Bold')
-       .text('FOR PRINCE INTERNATIONAL COURIER SERVICE', leftMargin + pageWidth / 2 + 6, y + 6)
+       .text(`FOR ${firmName}`, leftMargin + pageWidth / 2 + 6, y + 6)
     doc.fillColor('#6B7280').fontSize(7).font('Helvetica')
        .text('Authorized Signatory', leftMargin + pageWidth / 2 + 6, y + 35)
 

@@ -1,13 +1,15 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
+import { useBrandingStore } from '../store/brandingStore'
 import { authApi } from '../api/auth.api'
-import { Loader2, Eye, EyeOff, ArrowRight, Mail, Lock, Truck } from 'lucide-react'
+import { Loader2, Eye, EyeOff, ArrowRight, Mail, Lock, Truck, Settings } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const { setAuth } = useAuthStore()
+  const { branding } = useBrandingStore()
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [form, setForm] = useState({ email: '', password: '' })
@@ -35,77 +37,99 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-alt flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-surface-alt)' }}>
       {/* Main content — centered */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-[420px]">
+        <div className="w-full max-w-[400px]">
+
           {/* Card */}
-          <div className="bg-surface rounded-2xl shadow-[0_2px_16px_rgba(0,0,0,0.06)] border border-border-light p-8 sm:p-10">
+          <div className="bg-surface rounded-xl border border-border p-8 sm:p-9" style={{ boxShadow: 'var(--shadow-lg)' }}>
             {/* Logo & Brand */}
-            <div className="flex flex-col items-center mb-8">
-              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
-                <Truck className="w-6 h-6 text-white" />
+            <div className="flex flex-col items-center mb-7">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 overflow-hidden"
+                style={{
+                  backgroundColor: branding?.color_primary || 'var(--color-primary)',
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.25)'
+                }}
+              >
+                {branding?.firm_logo ? (
+                  <img src={branding.firm_logo} alt="Logo" className="w-8 h-8 object-contain" />
+                ) : (
+                  <Truck className="w-6 h-6 text-white" />
+                )}
               </div>
-              <h1 className="text-[22px] font-extrabold text-text-primary tracking-tight leading-none">
-                Prince Courier Service
+              <h1
+                className="text-[20px] font-bold text-text-primary tracking-tight leading-none text-center"
+                style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif" }}
+              >
+                {branding?.firm_name || 'SK Courier'}
               </h1>
-              <p className="text-[13px] text-text-tertiary mt-1.5 font-medium">
-                Enterprise Hub Access
+              <p className="text-[12px] text-text-tertiary mt-1 font-medium text-center">
+                {branding?.firm_tagline || 'Enterprise Hub Access'}
               </p>
             </div>
 
             {/* Divider */}
-            <div className="w-full h-px bg-border mb-7" />
+            <div className="w-full h-px bg-border-light mb-6" />
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="bg-danger-bg border border-red-100 text-danger text-[13px] px-4 py-3 rounded-xl animate-fade-in font-medium">
+                <div
+                  className="text-[13px] px-3.5 py-2.5 rounded-lg animate-fade-in font-medium"
+                  style={{
+                    backgroundColor: 'var(--color-danger-bg)',
+                    color: 'var(--color-danger)',
+                    border: '1px solid var(--color-danger-border)'
+                  }}
+                >
                   {error}
                 </div>
               )}
 
               {/* Email */}
               <div>
-                <label className="block text-[13px] font-semibold text-text-secondary mb-2">
-                  Corporate Email
+                <label className="block text-[12px] font-semibold text-text-secondary mb-1.5">
+                  Email Address
                 </label>
                 <div className="relative">
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <Mail className="w-[16px] h-[16px] text-text-tertiary" />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <Mail className="w-4 h-4 text-text-tertiary" />
                   </div>
                   <input
                     id="login-email"
                     name="email"
                     type="email"
-                    placeholder="user@princecourier.com"
+                    placeholder={branding?.firm_email || 'admin@company.com'}
                     autoComplete="username"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     required
                     data-case="normal"
                     style={{ textTransform: 'none' }}
-                    className="w-full pl-10 pr-4 py-2.5 bg-surface border border-border rounded-xl text-[14px] text-text-primary placeholder:text-text-tertiary outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/40 transition-all normal-case"
+                    className="w-full pl-9 pr-4 py-2.5 bg-surface border border-border rounded-lg text-[13px] text-text-primary placeholder:text-text-tertiary outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/40 transition-all normal-case"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-[13px] font-semibold text-text-secondary">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[12px] font-semibold text-text-secondary">
                     Password
                   </label>
                   <button
                     type="button"
-                    className="text-[11px] font-semibold text-primary hover:text-primary-dark transition-colors cursor-pointer"
+                    className="text-[11px] font-medium transition-colors cursor-pointer"
+                    style={{ color: 'var(--color-primary)' }}
                   >
                     Forgot password?
                   </button>
                 </div>
                 <div className="relative">
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <Lock className="w-[16px] h-[16px] text-text-tertiary" />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <Lock className="w-4 h-4 text-text-tertiary" />
                   </div>
                   <input
                     id="login-password"
@@ -118,19 +142,19 @@ export default function LoginPage() {
                     required
                     data-case="normal"
                     style={{ textTransform: 'none' }}
-                    className="w-full pl-10 pr-11 py-2.5 bg-surface border border-border rounded-xl text-[14px] text-text-primary placeholder:text-text-tertiary outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/40 transition-all normal-case"
+                    className="w-full pl-9 pr-10 py-2.5 bg-surface border border-border rounded-lg text-[13px] text-text-primary placeholder:text-text-tertiary outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/40 transition-all normal-case"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
-              {/* Remember */}
+              {/* Remember Me */}
               <label className="flex items-center gap-2 cursor-pointer select-none group">
                 <div className="relative">
                   <input
@@ -139,7 +163,13 @@ export default function LoginPage() {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-4 h-4 rounded border border-border bg-surface peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center">
+                  <div
+                    className="w-4 h-4 rounded border transition-all flex items-center justify-center"
+                    style={{
+                      borderColor: rememberMe ? 'var(--color-primary)' : 'var(--color-border-strong)',
+                      backgroundColor: rememberMe ? 'var(--color-primary)' : 'transparent'
+                    }}
+                  >
                     {rememberMe && (
                       <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -147,7 +177,7 @@ export default function LoginPage() {
                     )}
                   </div>
                 </div>
-                <span className="text-[13px] text-text-secondary group-hover:text-text-primary transition-colors">
+                <span className="text-[12px] text-text-secondary group-hover:text-text-primary transition-colors">
                   Remember this device
                 </span>
               </label>
@@ -157,7 +187,12 @@ export default function LoginPage() {
                 id="login-submit"
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-primary hover:bg-primary-dark text-white text-[14px] font-bold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer hover:shadow-lg hover:shadow-primary/25 active:scale-[0.99]"
+                className="w-full py-2.5 text-white text-[13px] font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                style={{
+                  backgroundColor: 'var(--color-primary)',
+                }}
+                onMouseEnter={e => { if (!loading) e.currentTarget.style.backgroundColor = 'var(--color-primary-dark)' }}
+                onMouseLeave={e => { if (!loading) e.currentTarget.style.backgroundColor = 'var(--color-primary)' }}
               >
                 {loading ? (
                   <>
@@ -177,21 +212,22 @@ export default function LoginPage() {
       </div>
 
       {/* Footer */}
-      <footer className="py-5 px-4 border-t border-border-light">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-[12px] text-text-tertiary">
-          <span>© {new Date().getFullYear()} Prince Courier Service. All rights reserved.</span>
+      <footer className="py-4 px-4 border-t border-border-light">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-5 text-[11px] text-text-tertiary">
+          <span>© {new Date().getFullYear()} {branding?.firm_name || 'SK Courier'}. All rights reserved.</span>
           <div className="hidden sm:block w-px h-3 bg-border" />
-          <div className="flex items-center gap-4">
-            <button className="hover:text-text-secondary transition-colors cursor-pointer">Privacy Policy</button>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/setup"
+              className="font-medium flex items-center gap-1 hover:underline"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              <Settings className="w-3 h-3" /> Setup & Database
+            </Link>
             <span className="text-border">|</span>
-            <button className="hover:text-text-secondary transition-colors cursor-pointer">Terms of Service</button>
+            <button className="hover:text-text-secondary transition-colors cursor-pointer">Privacy</button>
             <span className="text-border">|</span>
-            <button className="hover:text-text-secondary transition-colors cursor-pointer flex items-center gap-1">
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              Security Audit
-            </button>
+            <button className="hover:text-text-secondary transition-colors cursor-pointer">Terms</button>
           </div>
         </div>
       </footer>

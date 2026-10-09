@@ -3,6 +3,7 @@ import bwipjs from 'bwip-js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { getCompanyBranding } from './branding.service.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -13,8 +14,8 @@ if (!fs.existsSync(BILLS_DIR)) {
   fs.mkdirSync(BILLS_DIR, { recursive: true })
 }
 
-// Logo path
-const LOGO_PATH = path.join(__dirname, '..', 'assets', 'PRINCE LOGO.png')
+// Fallback logo path
+const FALLBACK_LOGO_PATH = path.join(__dirname, '..', 'assets', 'PRINCE LOGO.png')
 
 const COUNTRY_MAP = {
   'US': 'UNITED STATES', 'USA': 'UNITED STATES', 'UNITED STATES': 'UNITED STATES', 'UNITED STATES OF AMERICA': 'UNITED STATES',
@@ -109,6 +110,8 @@ export async function generateWaybillPdf(params) {
 
   const pdfPath = path.join(BILLS_DIR, `Waybill_${awbNumber}.pdf`)
 
+  const branding = await getCompanyBranding()
+
   return new Promise(async (resolve, reject) => {
     try {
       const doc = new PDFDocument({
@@ -124,16 +127,17 @@ export async function generateWaybillPdf(params) {
       const contentWidth = 555
 
       // ── Top Header Text (Outside Box) ──
+      const jurText = branding.firm_address ? `Subject to Jurisdiction` : 'Subject to Jurisdiction'
       doc.fillColor('#0D2132').fontSize(7).font('Helvetica')
-        .text('Subject to Surat Jurisdiction', startX, curY)
+        .text(jurText, startX, curY)
       doc.fillColor('#0D2132').fontSize(8).font('Helvetica-Bold')
         .text('Customer Copy', startX, curY, { width: contentWidth, align: 'right' })
 
       curY += 14
 
       // Color System
-      const NAVY = '#0D2132'
-      const RED = '#BB0013'
+      const NAVY = branding.color_primary || '#0D2132'
+      const RED = branding.color_accent || '#BB0013'
       const TEXT_DARK = '#111827'
       const BORDER_COLOR = '#0D2132'
 
@@ -166,9 +170,10 @@ export async function generateWaybillPdf(params) {
       // Header Col 1: Logo & Company Address
       let logoX = startX + 5
       let textLeft = startX + 6
-      if (fs.existsSync(LOGO_PATH)) {
+      const logoToUse = branding.firm_logo_path || (fs.existsSync(FALLBACK_LOGO_PATH) ? FALLBACK_LOGO_PATH : null)
+      if (logoToUse && fs.existsSync(logoToUse)) {
         try {
-          doc.image(LOGO_PATH, logoX, curY + 6, { fit: [46, 44] })
+          doc.image(logoToUse, logoX, curY + 6, { fit: [46, 44] })
           textLeft = startX + 56
         } catch (e) {
           console.error('Failed to load logo in PDF:', e.message)
@@ -176,13 +181,17 @@ export async function generateWaybillPdf(params) {
       }
 
       doc.fillColor(NAVY).fontSize(8.8).font('Helvetica-Bold')
-        .text('PRINCE INTERNATIONAL COURIER SERVICES', textLeft, curY + 6, { width: col1Width - (textLeft - startX) - 4 })
+        .text((branding.firm_name || 'COURIER SERVICES').toUpperCase(), textLeft, curY + 6, { width: col1Width - (textLeft - startX) - 4 })
+
+      const rawAddr = (branding.firm_address || '').split(/[\r\n]+/).map(s => s.trim()).filter(Boolean)
+      const line1 = rawAddr[0] || ''
+      const line2 = rawAddr.slice(1).join(', ')
 
       doc.fillColor(TEXT_DARK).fontSize(6.3).font('Helvetica')
-        .text('SHOP NO. 4, AL MARHABA APT OPP. SAI BABA EYE HOSPITAL,', textLeft, curY + 19, { width: col1Width - (textLeft - startX) - 4, lineGap: 1 })
-        .text('MACHHLIPITH B/H LALAGATE, SURAT-395003.', textLeft, curY + 28, { width: col1Width - (textLeft - startX) - 4 })
-        .text('Ph: 9898787199', textLeft, curY + 38)
-        .text('Website : http://www.princeexp.com', textLeft, curY + 46)
+      if (line1) doc.text(line1.toUpperCase(), textLeft, curY + 19, { width: col1Width - (textLeft - startX) - 4, lineGap: 1 })
+      if (line2) doc.text(line2.toUpperCase(), textLeft, curY + 28, { width: col1Width - (textLeft - startX) - 4 })
+      if (branding.firm_phone) doc.text(`Ph: ${branding.firm_phone}`, textLeft, curY + 38)
+      if (branding.firm_website) doc.text(`Website : ${branding.firm_website}`, textLeft, curY + 46)
 
       // Header Col 2: AWB, Destination (Full country name), Pieces
       const col2X = startX + col1Width + 6

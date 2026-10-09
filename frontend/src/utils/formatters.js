@@ -49,20 +49,22 @@ export const formatTime = (dateString) => {
 export const getStatusLabel = (status) => {
   const map = {
     draft: 'Draft',
-    pending: 'Booking',
+    pending: 'Pending',
     requested: 'Requested',
-    processing: 'Booking',
-    booked: 'Booking',
-    confirmed: 'Booking',
-    picked_up: 'In Transit',
+    processing: 'Processing',
+    booked: 'Booked',
+    confirmed: 'Confirmed',
+    picked_up: 'Picked Up',
     in_transit: 'In Transit',
-    out_for_delivery: 'In Transit',
+    out_for_delivery: 'Out for Delivery',
     delivered: 'Delivered',
     failed: 'Failed',
     cancelled: 'Cancelled',
-    rejected: 'Rejected'
+    rejected: 'Rejected',
+    returned: 'Returned',
+    rto: 'RTO'
   }
-  return map[status] || (status ? status.charAt(0).toUpperCase() + status.slice(1) : '—')
+  return map[status] || (status ? status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '—')
 }
 
 export const getStatusColor = (status) => {

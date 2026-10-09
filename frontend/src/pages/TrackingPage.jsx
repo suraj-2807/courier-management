@@ -166,15 +166,8 @@ export default function TrackingPage() {
 
       {/* ── Search Section ─────────────────────────────────────────── */}
       <div className="mb-6">
-        <div
-          className="bg-surface rounded-2xl overflow-hidden"
-          style={{
-            border: '1px solid transparent',
-            backgroundImage: 'linear-gradient(#fff, #fff), linear-gradient(135deg, #BB0013 0%, #FF4D6A 50%, #BB0013 100%)',
-            backgroundOrigin: 'border-box',
-            backgroundClip: 'padding-box, border-box'
-          }}
-        >
+        <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden relative">
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary via-primary-light to-primary" />
           <div className="p-5">
             <form onSubmit={handleSearch}>
               <div className="flex gap-3 items-end">

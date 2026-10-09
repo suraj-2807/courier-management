@@ -1,0 +1,20 @@
+{
+  "firm_name": "SK Courier",
+  "firm_tagline": "Fast, Secure & Worldwide",
+  "firm_logo": "/uploads/branding/logo-1791483063614.webp",
+  "firm_logo_path": "E:\\Courier Portal\\Dashboard\\courier-admin\\backend\\uploads\\branding\\logo-1791483063614.webp",
+  "color_primary": "#faab00",
+  "color_primary_dark": "#059669",
+  "color_primary_light": "#34D399",
+  "color_accent": "#031930",
+  "color_sidebar": "navy",
+  "firm_phone": "+91 98765 43210",
+  "firm_email": "contact@courierexpress.com",
+  "firm_website": "www.courierexpress.com",
+  "firm_address": "Main Logistics Hub, Cargo Terminal, City - 110001",
+  "firm_gstin": "",
+  "currency_symbol": "₹",
+  "invoice_prefix": "INV-",
+  "tracking_prefix": "EXP",
+  "is_setup_complete": "true"
+}

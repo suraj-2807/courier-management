@@ -1,7 +1,11 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
+import SuperAdminRoute from './SuperAdminRoute'
+import PermissionRoute from './PermissionRoute'
 import DashboardLayout from '../layouts/DashboardLayout'
 
+import SetupPage from '../pages/SetupPage'
 import LoginPage from '../pages/LoginPage'
 import DashboardPage from '../pages/DashboardPage'
 import BookingsPage from '../pages/BookingsPage'
@@ -16,14 +20,52 @@ import UsersPage from '../pages/UsersPage'
 import ProductsPage from '../pages/ProductsPage'
 import CustomersPage from '../pages/CustomersPage'
 import VendorRateImportPage from '../pages/VendorRateImportPage'
+import PermissionsPage from '../pages/PermissionsPage'
+import SettingsPage from '../pages/SettingsPage'
+
+import { useBrandingStore } from '../store/brandingStore'
+import { getSetupStatus } from '../api/setup.api'
 
 export default function AppRoutes() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { fetchBranding } = useBrandingStore()
+
+  useEffect(() => {
+    fetchBranding()
+
+    // Check if portal is already installed or requires setup wizard
+    const checkInstallation = async () => {
+      try {
+        const res = await getSetupStatus()
+        if (res && res.isInstalled === false) {
+          if (!location.pathname.startsWith('/setup') && !location.pathname.startsWith('/customer/')) {
+            navigate('/setup')
+          }
+        } else if (res && res.isInstalled === true) {
+          if (location.pathname === '/setup' && !location.search.includes('reset=true')) {
+            navigate('/settings', { replace: true })
+          }
+        }
+      } catch (err) {
+        if (!location.pathname.startsWith('/setup') && !location.pathname.startsWith('/customer/')) {
+          navigate('/setup')
+        }
+      }
+    }
+
+    checkInstallation()
+  }, [])
+
   return (
     <Routes>
+      {/* Installation / Setup Wizard — Super Admin only once installed */}
+      <Route path="/setup" element={<SetupPage />} />
+
       {/* Public routes */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Protected routes */}
+      {/* ═══ Protected routes (all authenticated users) ═══ */}
       <Route
         path="/"
         element={
@@ -91,36 +133,6 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="/api-settings"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <ApiSettingsPage />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/rates"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <RatesPage />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/vendor-rate-import"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <VendorRateImportPage />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/booking-requests"
         element={
           <ProtectedRoute>
@@ -140,16 +152,70 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* ═══ Configuration & Admin Routes (Permitted for Normal Admin & Super Admin) ═══ */}
+      <Route
+        path="/api-settings"
+        element={
+          <PermissionRoute module="api_settings">
+            <DashboardLayout>
+              <ApiSettingsPage />
+            </DashboardLayout>
+          </PermissionRoute>
+        }
+      />
+      <Route
+        path="/rates"
+        element={
+          <PermissionRoute module="rates">
+            <DashboardLayout>
+              <RatesPage />
+            </DashboardLayout>
+          </PermissionRoute>
+        }
+      />
+      <Route
+        path="/vendor-rate-import"
+        element={
+          <PermissionRoute module="vendor_rate_import">
+            <DashboardLayout>
+              <VendorRateImportPage />
+            </DashboardLayout>
+          </PermissionRoute>
+        }
+      />
       <Route
         path="/products"
         element={
-          <ProtectedRoute>
+          <PermissionRoute module="products">
             <DashboardLayout>
               <ProductsPage />
+            </DashboardLayout>
+          </PermissionRoute>
+        }
+      />
+
+      <Route
+        path="/permissions"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <PermissionsPage />
             </DashboardLayout>
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <SettingsPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/senders"
         element={<Navigate to="/users" replace />}

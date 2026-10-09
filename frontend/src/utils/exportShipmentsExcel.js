@@ -190,7 +190,7 @@ export function exportShipmentsToExcel(shipments = [], fileName = '') {
 
   // Generate date stamp for file name
   const dateStr = new Date().toISOString().split('T')[0]
-  const outName = fileName || `PrinceExp_Shipments_Export_${dateStr}.xlsx`
+  const outName = fileName || `Shipments_Export_${dateStr}.xlsx`
 
   // Download Excel file
   XLSX.writeFile(workbook, outName)

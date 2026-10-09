@@ -3,40 +3,63 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT) || 3306,
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'courier_admin',
-  charset: 'utf8mb4',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0,
-  // Parse JSON columns automatically (works with both MySQL and MariaDB)
-  // MySQL JSON_OBJECT → type 'JSON', MariaDB → type 245/253 (VAR_STRING)
-  typeCast: function (field, next) {
-    if (field.type === 'JSON') {
-      const val = field.string()
-      return val ? JSON.parse(val) : null
-    }
-    if (field.type === 'STRING' || field.type === 'VAR_STRING' || field.type === 'BLOB') {
-      const val = field.string()
-      if (val === null) return null
-      if ((val.startsWith('{') && val.endsWith('}')) || (val.startsWith('[') && val.endsWith(']'))) {
-        try {
-          return JSON.parse(val)
-        } catch {
-          return val
-        }
+function createAppPool(customConfig = {}) {
+  const host = customConfig.host || process.env.DB_HOST || 'localhost'
+  const port = parseInt(customConfig.port || process.env.DB_PORT) || 3306
+  const user = customConfig.user !== undefined ? customConfig.user : (process.env.DB_USER || 'root')
+  const password = customConfig.password !== undefined ? customConfig.password : (process.env.DB_PASSWORD || '')
+  const database = customConfig.database || process.env.DB_NAME || 'courier_admin'
+
+  return mysql.createPool({
+    host,
+    port,
+    user,
+    password,
+    database,
+    charset: 'utf8mb4',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0,
+    // Parse JSON columns automatically (works with both MySQL and MariaDB)
+    typeCast: function (field, next) {
+      if (field.type === 'JSON') {
+        const val = field.string()
+        return val ? JSON.parse(val) : null
       }
-      return val
+      if (field.type === 'STRING' || field.type === 'VAR_STRING' || field.type === 'BLOB') {
+        const val = field.string()
+        if (val === null) return null
+        if ((val.startsWith('{') && val.endsWith('}')) || (val.startsWith('[') && val.endsWith(']'))) {
+          try {
+            return JSON.parse(val)
+          } catch {
+            return val
+          }
+        }
+        return val
+      }
+      return next()
     }
-    return next()
+  })
+}
+
+let pool = createAppPool()
+
+export function reconfigurePool(customConfig = {}) {
+  if (pool) {
+    try {
+      pool.end()
+    } catch (e) {}
   }
-})
+  pool = createAppPool(customConfig)
+  return pool
+}
+
+export function getPool() {
+  return pool
+}
 
 /**
  * Execute a query with standard text protocol (supports DDL like SHOW, ALTER, CREATE, information_schema).
@@ -830,6 +853,54 @@ export async function initializeDb() {
       if (vriErr.code !== 'ER_TABLE_EXISTS_ERROR') {
         console.error('vendor_rate_import tables migration failed:', vriErr.message)
       }
+    }
+
+    // ── System settings table auto-migration ──
+    try {
+      await execute(`CREATE TABLE IF NOT EXISTS system_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        setting_key VARCHAR(100) NOT NULL UNIQUE,
+        setting_value TEXT DEFAULT NULL,
+        description VARCHAR(255) DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_settings_key (setting_key)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+      console.log('system_settings table ready.')
+    } catch (ssErr) {
+      if (ssErr.code !== 'ER_TABLE_EXISTS_ERROR') {
+        console.error('system_settings migration failed:', ssErr.message)
+      }
+    }
+
+    // ── Users Table & Super Admin Role Migration ──
+    try {
+      await execute(`CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(50) DEFAULT 'admin',
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+
+      // Ensure role column is VARCHAR(50)
+      try {
+        await execute(`ALTER TABLE users MODIFY COLUMN role VARCHAR(50) DEFAULT 'admin'`)
+      } catch (modErr) {}
+
+      // Auto-promote first admin user to super_admin if no super_admin exists
+      try {
+        const superAdmins = await query("SELECT id FROM users WHERE role = 'super_admin' LIMIT 1")
+        if (!superAdmins || superAdmins.length === 0) {
+          await execute("UPDATE users SET role = 'super_admin' WHERE role = 'admin' ORDER BY id ASC LIMIT 1")
+          console.log('Promoted primary admin to super_admin.')
+        }
+      } catch (pErr) {}
+    } catch (userErr) {
+      console.warn('users table verification notice:', userErr.message)
     }
 
     console.log('DB initialization successfully completed!')

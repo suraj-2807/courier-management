@@ -225,7 +225,7 @@ export default function PacificRatesView() {
           left: 0,
           right: 0,
           height: '3px',
-          background: 'linear-gradient(90deg, #BB0013, #FF5722, #4CAF50)'
+          background: 'linear-gradient(90deg, var(--color-primary), var(--color-primary-light), #10B981)'
         }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -233,7 +233,7 @@ export default function PacificRatesView() {
             width: '48px',
             height: '48px',
             borderRadius: '12px',
-            background: 'linear-gradient(135deg, rgba(187, 0, 19, 0.1), rgba(255, 87, 34, 0.1))',
+            background: 'var(--color-primary-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -298,7 +298,7 @@ export default function PacificRatesView() {
               transition: 'all 0.2s'
             }}
           >
-            <Calculator style={{ width: '15px', height: '15px', color: '#BB0013' }} />
+            <Calculator style={{ width: '15px', height: '15px', color: 'var(--color-primary)' }} />
             Rate Calculator
           </button>
 
@@ -312,11 +312,11 @@ export default function PacificRatesView() {
               fontSize: '13px',
               fontWeight: 700,
               color: 'white',
-              background: 'linear-gradient(135deg, #BB0013, #D4001A)',
+              background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
               border: 'none',
               borderRadius: '10px',
               cursor: 'pointer',
-              boxShadow: '0 2px 10px rgba(187, 0, 19, 0.25)',
+              boxShadow: '0 2px 10px var(--color-primary-subtle)',
               transition: 'all 0.2s'
             }}
           >
@@ -345,7 +345,7 @@ export default function PacificRatesView() {
               fontWeight: 700,
               borderRadius: '8px 8px 0 0',
               border: 'none',
-              borderBottom: activeSubTab === 'rates' ? '3px solid #BB0013' : '3px solid transparent',
+              borderBottom: activeSubTab === 'rates' ? '3px solid var(--color-primary)' : '3px solid transparent',
               background: 'transparent',
               color: activeSubTab === 'rates' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
               cursor: 'pointer',
@@ -366,7 +366,7 @@ export default function PacificRatesView() {
               fontWeight: 700,
               borderRadius: '8px 8px 0 0',
               border: 'none',
-              borderBottom: activeSubTab === 'calculator' ? '3px solid #BB0013' : '3px solid transparent',
+              borderBottom: activeSubTab === 'calculator' ? '3px solid var(--color-primary)' : '3px solid transparent',
               background: 'transparent',
               color: activeSubTab === 'calculator' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
               cursor: 'pointer',
@@ -387,7 +387,7 @@ export default function PacificRatesView() {
               fontWeight: 700,
               borderRadius: '8px 8px 0 0',
               border: 'none',
-              borderBottom: activeSubTab === 'versions' ? '3px solid #BB0013' : '3px solid transparent',
+              borderBottom: activeSubTab === 'versions' ? '3px solid var(--color-primary)' : '3px solid transparent',
               background: 'transparent',
               color: activeSubTab === 'versions' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
               cursor: 'pointer',
@@ -522,7 +522,7 @@ export default function PacificRatesView() {
                     fontSize: '13px',
                     fontWeight: 700,
                     color: 'white',
-                    background: '#BB0013',
+                    background: 'var(--color-primary)',
                     border: 'none',
                     borderRadius: '8px',
                     cursor: 'pointer'
@@ -564,7 +564,7 @@ export default function PacificRatesView() {
                       >
                         <td style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Globe style={{ width: '14px', height: '14px', color: '#BB0013', flexShrink: 0 }} />
+                            <Globe style={{ width: '14px', height: '14px', color: 'var(--color-primary)', flexShrink: 0 }} />
                             {r.destination_country}
                           </div>
                         </td>
@@ -602,8 +602,8 @@ export default function PacificRatesView() {
                                     fontSize: '11px',
                                     padding: '2px 6px',
                                     borderRadius: '4px',
-                                    background: 'rgba(187, 0, 19, 0.06)',
-                                    color: '#BB0013',
+                                    background: 'var(--color-primary-subtle)',
+                                    color: 'var(--color-primary)',
                                     fontWeight: 600
                                   }}
                                 >
@@ -643,7 +643,7 @@ export default function PacificRatesView() {
                 width: '36px',
                 height: '36px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #BB0013, #D4001A)',
+                background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -752,11 +752,11 @@ export default function PacificRatesView() {
                   fontSize: '14px',
                   fontWeight: 700,
                   color: 'white',
-                  background: 'linear-gradient(135deg, #BB0013, #D4001A)',
+                  background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
                   border: 'none',
                   borderRadius: '10px',
                   cursor: calcLoading ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 2px 8px rgba(187, 0, 19, 0.25)'
+                  boxShadow: '0 2px 8px var(--color-primary-subtle)'
                 }}
               >
                 {calcLoading ? (
@@ -808,16 +808,16 @@ export default function PacificRatesView() {
 
                 {/* Big Price Display */}
                 <div style={{
-                  background: 'linear-gradient(135deg, rgba(187, 0, 19, 0.05), rgba(255, 87, 34, 0.05))',
+                  background: 'var(--color-primary-subtle)',
                   padding: '20px',
                   borderRadius: '12px',
                   textAlign: 'center',
-                  border: '1px solid rgba(187, 0, 19, 0.1)'
+                  border: '1px solid var(--color-primary-muted)'
                 }}>
                   <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
                     Estimated Vendor Base Rate
                   </div>
-                  <div style={{ fontSize: '32px', fontWeight: 900, color: '#BB0013', marginTop: '4px' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 900, color: 'var(--color-primary)', marginTop: '4px' }}>
                     ₹{parseFloat(calcResult.base_rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
@@ -854,7 +854,7 @@ export default function PacificRatesView() {
 
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: 'var(--color-text-secondary)' }}>Slab Applied:</span>
-                    <span style={{ color: '#BB0013', fontWeight: 600 }}>{calcResult.slab_applied || 'Standard'}</span>
+                    <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>{calcResult.slab_applied || 'Standard'}</span>
                   </div>
 
                   {calcResult.is_remote && (
@@ -941,7 +941,7 @@ export default function PacificRatesView() {
                 fontSize: '12px',
                 fontWeight: 700,
                 color: 'white',
-                background: '#BB0013',
+                background: 'var(--color-primary)',
                 border: 'none',
                 borderRadius: '8px',
                 cursor: 'pointer'
@@ -1217,7 +1217,7 @@ export default function PacificRatesView() {
                   borderRadius: '16px',
                   padding: '36px 20px',
                   textAlign: 'center',
-                  background: uploadDragging ? 'rgba(187, 0, 19, 0.04)' : 'var(--color-surface-alt)',
+                  background: uploadDragging ? 'var(--color-primary-subtle)' : 'var(--color-surface-alt)',
                   cursor: 'pointer',
                   transition: 'all 0.2s'
                 }}
@@ -1237,11 +1237,11 @@ export default function PacificRatesView() {
                   height: '52px',
                   margin: '0 auto 12px',
                   borderRadius: '14px',
-                  background: 'linear-gradient(135deg, rgba(187, 0, 19, 0.1), rgba(255, 87, 34, 0.1))',
+                  background: 'var(--color-primary-subtle)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#BB0013'
+                  color: 'var(--color-primary)'
                 }}>
                   {uploadMutation.isPending ? (
                     <RefreshCw style={{ width: '24px', height: '24px', animation: 'spin 1s linear infinite' }} />
@@ -1419,7 +1419,7 @@ export default function PacificRatesView() {
             }}>
               <div>
                 <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <GitCompare style={{ width: '18px', height: '18px', color: '#BB0013' }} />
+                  <GitCompare style={{ width: '18px', height: '18px', color: 'var(--color-primary)' }} />
                   Tariff Diff: Version v{diffModalVersionId} vs Active
                 </h3>
                 <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
@@ -1444,7 +1444,7 @@ export default function PacificRatesView() {
             <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {diffLoading ? (
                 <div style={{ padding: '40px', textAlign: 'center' }}>
-                  <RefreshCw style={{ width: '28px', height: '28px', animation: 'spin 1s linear infinite', color: '#BB0013', margin: '0 auto 10px' }} />
+                  <RefreshCw style={{ width: '28px', height: '28px', animation: 'spin 1s linear infinite', color: 'var(--color-primary)', margin: '0 auto 10px' }} />
                   <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>Comparing versions...</div>
                 </div>
               ) : diffData?.diff ? (

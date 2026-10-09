@@ -221,7 +221,7 @@ export default function RatesPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--color-text-primary)', fontFamily: 'var(--font-family-heading)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #BB0013, #FF1A3D)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <IndianRupee style={{ width: '18px', height: '18px', color: 'white' }} />
             </div>
             Rate Management
@@ -239,9 +239,9 @@ export default function RatesPage() {
               style={{
                 display: 'flex', alignItems: 'center', gap: '6px',
                 padding: '8px 18px', fontSize: '13px', fontWeight: 700,
-                color: 'white', background: 'linear-gradient(135deg, #BB0013, #D4001A)',
+                color: 'white', background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
                 border: 'none', borderRadius: '10px', cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(187, 0, 19, 0.25)',
+                boxShadow: '0 2px 8px var(--color-primary-subtle)',
                 transition: 'all 0.2s'
               }}
             >
@@ -278,10 +278,10 @@ export default function RatesPage() {
             cursor: 'pointer',
             transition: 'all 0.2s',
             background: systemMode === 'pacific'
-              ? 'linear-gradient(135deg, #BB0013, #D4001A)'
+              ? 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))'
               : 'transparent',
             color: systemMode === 'pacific' ? 'white' : 'var(--color-text-secondary)',
-            boxShadow: systemMode === 'pacific' ? '0 2px 8px rgba(187, 0, 19, 0.25)' : 'none'
+            boxShadow: systemMode === 'pacific' ? '0 2px 8px var(--color-primary-subtle)' : 'none'
           }}
         >
           <Globe style={{ width: '15px', height: '15px' }} />
@@ -302,10 +302,10 @@ export default function RatesPage() {
             cursor: 'pointer',
             transition: 'all 0.2s',
             background: systemMode === 'standard'
-              ? 'linear-gradient(135deg, #BB0013, #D4001A)'
+              ? 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))'
               : 'transparent',
             color: systemMode === 'standard' ? 'white' : 'var(--color-text-secondary)',
-            boxShadow: systemMode === 'standard' ? '0 2px 8px rgba(187, 0, 19, 0.25)' : 'none'
+            boxShadow: systemMode === 'standard' ? '0 2px 8px var(--color-primary-subtle)' : 'none'
           }}
         >
           <Building2 style={{ width: '15px', height: '15px' }} />
@@ -328,7 +328,7 @@ export default function RatesPage() {
             onClick={() => fileInputRef.current?.click()}
             style={{
               background: uploadDragging
-                ? 'linear-gradient(135deg, rgba(187, 0, 19, 0.04), rgba(187, 0, 19, 0.08))'
+                ? 'var(--color-primary-subtle)'
                 : 'var(--color-surface)',
               border: uploadDragging ? '2px dashed var(--color-primary)' : '2px dashed var(--color-border)',
               borderRadius: '16px', padding: '32px', cursor: 'pointer',
@@ -340,7 +340,7 @@ export default function RatesPage() {
             {/* Background decoration */}
             <div style={{
               position: 'absolute', top: '-20px', right: '-20px', width: '120px', height: '120px',
-              background: 'linear-gradient(135deg, rgba(187, 0, 19, 0.05), transparent)',
+              background: 'linear-gradient(135deg, var(--color-primary-subtle), transparent)',
               borderRadius: '50%'
             }} />
             <div style={{
@@ -352,9 +352,9 @@ export default function RatesPage() {
               width: '52px', height: '52px',
               background: uploadMutation.isPending
                 ? 'linear-gradient(135deg, #F59E0B, #FBBF24)'
-                : 'linear-gradient(135deg, #BB0013, #FF1A3D)',
+                : 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
               borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: '12px', boxShadow: '0 4px 12px rgba(187, 0, 19, 0.2)'
+              marginBottom: '12px', boxShadow: '0 4px 12px var(--color-primary-subtle)'
             }}>
               {uploadMutation.isPending
                 ? <RefreshCw style={{ width: '22px', height: '22px', color: 'white', animation: 'spin 1s linear infinite' }} />
@@ -433,7 +433,7 @@ export default function RatesPage() {
         }}>
           <div style={{
             width: '64px', height: '64px', margin: '0 auto 16px',
-            background: 'linear-gradient(135deg, rgba(187, 0, 19, 0.08), rgba(187, 0, 19, 0.03))',
+            background: 'var(--color-primary-subtle)',
             borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
             <FileSpreadsheet style={{ width: '28px', height: '28px', color: 'var(--color-primary)' }} />
@@ -449,9 +449,9 @@ export default function RatesPage() {
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '6px',
               padding: '10px 24px', fontSize: '13px', fontWeight: 700,
-              color: 'white', background: 'linear-gradient(135deg, #BB0013, #D4001A)',
+              color: 'white', background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
               border: 'none', borderRadius: '10px', cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(187, 0, 19, 0.25)'
+              boxShadow: '0 2px 8px var(--color-primary-subtle)'
             }}
           >
             <Upload style={{ width: '14px', height: '14px' }} />
@@ -481,10 +481,10 @@ export default function RatesPage() {
                   whiteSpace: 'nowrap', transition: 'all 0.25s ease',
                   display: 'flex', alignItems: 'center', gap: '8px',
                   background: selectedCompanyId === company.id
-                    ? 'linear-gradient(135deg, #BB0013, #D4001A)'
+                    ? 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))'
                     : 'transparent',
                   color: selectedCompanyId === company.id ? 'white' : 'var(--color-text-secondary)',
-                  boxShadow: selectedCompanyId === company.id ? '0 2px 10px rgba(187, 0, 19, 0.25)' : 'none'
+                  boxShadow: selectedCompanyId === company.id ? '0 2px 10px var(--color-primary-subtle)' : 'none'
                 }}
               >
                 <Building2 style={{ width: '14px', height: '14px' }} />
@@ -548,7 +548,7 @@ export default function RatesPage() {
                       fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                       whiteSpace: 'nowrap', transition: 'all 0.2s',
                       background: selectedServiceId === service.id
-                        ? 'rgba(187, 0, 19, 0.04)'
+                        ? 'var(--color-primary-subtle)'
                         : 'var(--color-surface)',
                       color: selectedServiceId === service.id
                         ? 'var(--color-primary)'
@@ -588,9 +588,9 @@ export default function RatesPage() {
                       padding: '8px 18px', borderRadius: '8px', border: 'none',
                       fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                       transition: 'all 0.2s',
-                      background: activeDataTab === 'rates' ? 'linear-gradient(135deg, #BB0013, #D4001A)' : 'transparent',
+                      background: activeDataTab === 'rates' ? 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))' : 'transparent',
                       color: activeDataTab === 'rates' ? 'white' : 'var(--color-text-secondary)',
-                      boxShadow: activeDataTab === 'rates' ? '0 2px 8px rgba(187, 0, 19, 0.2)' : 'none',
+                      boxShadow: activeDataTab === 'rates' ? '0 2px 8px var(--color-primary-subtle)' : 'none',
                       display: 'flex', alignItems: 'center', gap: '6px'
                     }}
                   >
