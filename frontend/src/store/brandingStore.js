@@ -58,46 +58,75 @@ function applyBrandingToDOM(branding) {
     document.title = `${branding.firm_name} — Admin Dashboard`
   }
 
-  // Set favicon with clean white background from firm logo
-  if (branding.firm_logo) {
-    try {
+  // Set favicon with custom background color from firm logo or generated badge
+  try {
+    const favBg = branding.favicon_bg_color || '#ffffff'
+    const canvas = document.createElement('canvas')
+    const size = 64
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d')
+
+    const updateFaviconLink = (dataUrl) => {
+      let link = document.querySelector("link[rel*='icon']")
+      if (!link) {
+        link = document.createElement('link')
+        link.rel = 'icon'
+        document.head.appendChild(link)
+      }
+      link.href = dataUrl
+    }
+
+    const drawBackground = () => {
+      ctx.clearRect(0, 0, size, size)
+      ctx.fillStyle = favBg
+      ctx.beginPath()
+      if (ctx.roundRect) {
+        ctx.roundRect(0, 0, size, size, 14)
+      } else {
+        ctx.rect(0, 0, size, size)
+      }
+      ctx.fill()
+    }
+
+    if (branding.firm_logo) {
       const img = new Image()
       img.crossOrigin = 'anonymous'
       img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const size = 64
-        canvas.width = size
-        canvas.height = size
-        const ctx = canvas.getContext('2d')
         if (ctx) {
-          // Draw crisp white background with rounded corners
-          ctx.fillStyle = '#ffffff'
-          ctx.beginPath()
-          if (ctx.roundRect) {
-            ctx.roundRect(0, 0, size, size, 14)
-          } else {
-            ctx.rect(0, 0, size, size)
-          }
-          ctx.fill()
-
-          // Draw logo centered with neat padding
+          drawBackground()
           const pad = 8
           ctx.drawImage(img, pad, pad, size - pad * 2, size - pad * 2)
-
-          const iconUrl = canvas.toDataURL('image/png')
-          let link = document.querySelector("link[rel*='icon']")
-          if (!link) {
-            link = document.createElement('link')
-            link.rel = 'icon'
-            document.head.appendChild(link)
-          }
-          link.href = iconUrl
+          updateFaviconLink(canvas.toDataURL('image/png'))
+        }
+      }
+      img.onerror = () => {
+        if (ctx) {
+          drawBackground()
+          ctx.fillStyle = branding.color_primary || '#10B981'
+          ctx.font = 'bold 28px sans-serif'
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          const initials = (branding.firm_name || 'SK').slice(0, 2).toUpperCase()
+          ctx.fillText(initials, size / 2, size / 2)
+          updateFaviconLink(canvas.toDataURL('image/png'))
         }
       }
       img.src = branding.firm_logo
-    } catch (err) {
-      // Non-blocking fallback
+    } else if (favBg) {
+      if (ctx) {
+        drawBackground()
+        ctx.fillStyle = branding.color_primary || '#10B981'
+        ctx.font = 'bold 28px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        const initials = (branding.firm_name || 'SK').slice(0, 2).toUpperCase()
+        ctx.fillText(initials, size / 2, size / 2)
+        updateFaviconLink(canvas.toDataURL('image/png'))
+      }
     }
+  } catch (err) {
+    // Non-blocking fallback
   }
 }
 
@@ -108,6 +137,7 @@ export const useBrandingStore = create(
         firm_name: 'SK Courier',
         firm_tagline: 'Fast, Secure & Worldwide',
         firm_logo: '',
+        favicon_bg_color: '#ffffff',
         color_primary: '#10B981',
         color_primary_dark: '#059669',
         color_primary_light: '#34D399',

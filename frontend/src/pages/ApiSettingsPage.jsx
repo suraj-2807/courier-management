@@ -32,7 +32,8 @@ import {
   FileText,
   ChevronDown,
   Upload,
-  Wallet
+  Wallet,
+  Package
 } from 'lucide-react'
 import {
   getApiSettings,
@@ -48,11 +49,13 @@ import {
 } from '../api/apiSettings.api'
 import { countryCodesApi } from '../api/countryCodes.api'
 import { systemSettingsApi } from '../api/systemSettings.api'
+import ManualVendorEntriesModal from '../components/ManualVendorEntriesModal'
 
 const AUTH_TYPES = [
   { value: 'token', label: 'Token (Bearer)', desc: 'Separate auth endpoint → get token → use in headers' },
   { value: 'inline', label: 'Inline (Payload)', desc: 'Credentials sent directly in the request payload' },
-  { value: 'api_key', label: 'API Key (Header)', desc: 'API key sent as a custom header' }
+  { value: 'api_key', label: 'API Key (Header)', desc: 'API key sent as a custom header' },
+  { value: 'manual', label: 'Manual / No-API', desc: 'No vendor API. Manage entries manually & serve via public REST API' }
 ]
 
 function safeArray(val) {
@@ -259,6 +262,7 @@ export default function ApiSettingsPage() {
   const [requestTemplateStr, setRequestTemplateStr] = useState('')
   const [headersTemplateStr, setHeadersTemplateStr] = useState('')
   const [modalTab, setModalTab] = useState('connection')
+  const [manualEntriesVendor, setManualEntriesVendor] = useState(null)
 
   // Country Codes Manager State
   const [showCountryModal, setShowCountryModal] = useState(false)
@@ -935,22 +939,33 @@ export default function ApiSettingsPage() {
                     fontSize: '11px', fontWeight: 600,
                     padding: '3px 8px', borderRadius: '6px',
                     display: 'inline-flex', alignItems: 'center', gap: '4px', width: 'fit-content',
-                    background: config.auth_type === 'token' ? '#EDE9FE' : config.auth_type === 'api_key' ? '#E0E7FF' : '#FEF3C7',
-                    color: config.auth_type === 'token' ? '#6D28D9' : config.auth_type === 'api_key' ? '#3730A3' : '#92400E'
+                    background: config.auth_type === 'token' ? '#EDE9FE' : config.auth_type === 'api_key' ? '#E0E7FF' : config.auth_type === 'manual' ? '#DCFCE7' : '#FEF3C7',
+                    color: config.auth_type === 'token' ? '#6D28D9' : config.auth_type === 'api_key' ? '#3730A3' : config.auth_type === 'manual' ? '#15803D' : '#92400E'
                   }}>
                     <Key style={{ width: '10px', height: '10px' }} />
-                    {config.auth_type === 'token' ? 'Bearer Token' : config.auth_type === 'api_key' ? 'API Key' : 'Inline'}
+                    {config.auth_type === 'token' ? 'Bearer Token' : config.auth_type === 'api_key' ? 'API Key' : config.auth_type === 'manual' ? 'Manual / No-API' : 'Inline'}
                   </span>
 
-                  {/* Shipment API URL */}
+                  {/* Shipment API URL / Public Tracking URL */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <code style={{
-                      fontSize: '11px', color: 'var(--color-text-secondary)',
-                      background: 'var(--color-surface-alt)', padding: '4px 8px',
-                      borderRadius: '6px', maxWidth: '220px', overflow: 'hidden',
-                      textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block',
-                      fontFamily: "'JetBrains Mono', monospace"
-                    }}>{config.shipment_api_url || '—'}</code>
+                    {config.auth_type === 'manual' ? (
+                      <span style={{
+                        fontSize: '11px', color: 'var(--color-primary)', fontWeight: 600,
+                        background: 'var(--color-primary-subtle)', padding: '4px 8px', borderRadius: '6px',
+                        display: 'inline-flex', alignItems: 'center', gap: '4px'
+                      }}>
+                        <Package style={{ width: '11px', height: '11px' }} />
+                        Public Tracking API
+                      </span>
+                    ) : (
+                      <code style={{
+                        fontSize: '11px', color: 'var(--color-text-secondary)',
+                        background: 'var(--color-surface-alt)', padding: '4px 8px',
+                        borderRadius: '6px', maxWidth: '220px', overflow: 'hidden',
+                        textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block',
+                        fontFamily: "'JetBrains Mono', monospace"
+                      }}>{config.shipment_api_url || '—'}</code>
+                    )}
                   </div>
 
                   {/* Environment */}
@@ -988,13 +1003,23 @@ export default function ApiSettingsPage() {
                   {/* Actions */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                     <ActionBtn
-                      icon={testingId === config.id ? Loader2 : Zap}
-                      title="Test Connection"
-                      hoverBg="var(--color-info-bg)"
-                      hoverColor="var(--color-info)"
-                      spinning={testingId === config.id}
-                      onClick={() => handleTest(config.id)}
+                      icon={Package}
+                      title="Manage Manual Entries & Public API"
+                      hoverBg="var(--color-primary-subtle)"
+                      hoverColor="var(--color-primary)"
+                      color={config.auth_type === 'manual' ? 'var(--color-primary)' : undefined}
+                      onClick={() => setManualEntriesVendor(config)}
                     />
+                    {config.auth_type !== 'manual' && (
+                      <ActionBtn
+                        icon={testingId === config.id ? Loader2 : Zap}
+                        title="Test Connection"
+                        hoverBg="var(--color-info-bg)"
+                        hoverColor="var(--color-info)"
+                        spinning={testingId === config.id}
+                        onClick={() => handleTest(config.id)}
+                      />
+                    )}
                     <ActionBtn
                       icon={Pencil}
                       title="Edit"
@@ -1103,17 +1128,17 @@ export default function ApiSettingsPage() {
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '6px' }}>
                   {testResult.latency_ms && (
-                    <span style={{ fontSize: '11px', color: testResult.reachable ? '#15803D' : '#B91C1C' }}>
+                    <span style={{ fontSize: '11px', color: testResult.reachable ? 'var(--color-primary)' : '#B91C1C' }}>
                       Latency: {testResult.latency_ms}ms
                     </span>
                   )}
                   {testResult.token_preview && (
-                    <span style={{ fontSize: '11px', color: '#15803D', fontFamily: "'JetBrains Mono', monospace" }}>
+                    <span style={{ fontSize: '11px', color: 'var(--color-primary)', fontFamily: "'JetBrains Mono', monospace" }}>
                       Token: {testResult.token_preview}
                     </span>
                   )}
                   {testResult.customer_id && (
-                    <span style={{ fontSize: '11px', color: '#15803D' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--color-primary)' }}>
                       Customer ID: {testResult.customer_id}
                     </span>
                   )}
@@ -1348,7 +1373,7 @@ export default function ApiSettingsPage() {
                     {/* Auth Type Selector */}
                     <div>
                       <label style={labelStyle}>Auth Type *</label>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px' }}>
                         {AUTH_TYPES.map((at) => (
                           <button
                             key={at.value}
@@ -1373,6 +1398,16 @@ export default function ApiSettingsPage() {
                         ))}
                       </div>
                     </div>
+
+                    {form.auth_type === 'manual' && (
+                      <div style={{
+                        padding: '12px 16px', borderRadius: '12px',
+                        background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)',
+                        fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.5
+                      }}>
+                        <strong style={{ color: 'var(--color-primary)' }}>Manual / No-API Vendor:</strong> External carrier API endpoint and credentials are not required. You can manage manual entries for this vendor, and our server provides a public tracking REST API at <code>/api/v1/manual-vendor/{form.vendor_code || 'vendor'}/track/:awb</code> that external websites can call.
+                      </div>
+                    )}
 
                     {/* Token Auth Fields */}
                     {form.auth_type === 'token' && (
@@ -1410,73 +1445,75 @@ export default function ApiSettingsPage() {
                       </div>
                     )}
 
-                    {/* Credentials */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                      <div>
-                        <label style={labelStyle}>Username / User ID {!editingId && '*'}</label>
-                        <input
-                          required={!editingId}
-                          value={form.user_id || form.username}
-                          onChange={(e) => setForm({ ...form, user_id: e.target.value, username: e.target.value })}
-                          placeholder={editingId ? 'Leave blank to keep current' : 'API Username'}
-                          style={inputStyle}
-                        />
-                      </div>
-                      <div>
-                        <label style={labelStyle}>Password {!editingId && '*'}</label>
-                        <div style={{ position: 'relative' }}>
+                    {/* Simple Credential Inputs */}
+                    {form.auth_type !== 'manual' && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div>
+                          <label style={labelStyle}>Username / User ID {!editingId && '*'}</label>
                           <input
                             required={!editingId}
-                            type={showPassword ? 'text' : 'password'}
-                            value={form.password}
-                            onChange={(e) => setForm({ ...form, password: e.target.value })}
-                            placeholder={editingId ? 'Leave blank to keep current' : 'API Password'}
-                            style={{ ...inputStyle, paddingRight: '40px' }}
+                            value={form.user_id || form.username}
+                            onChange={(e) => setForm({ ...form, user_id: e.target.value, username: e.target.value })}
+                            placeholder={editingId ? 'Leave blank to keep current' : 'API Username'}
+                            style={inputStyle}
                           />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            style={{
-                              position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
-                              background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-tertiary)',
-                              padding: '4px', display: 'flex'
-                            }}
-                          >
-                            {showPassword ? <EyeOff style={{ width: '14px', height: '14px' }} /> : <Eye style={{ width: '14px', height: '14px' }} />}
-                          </button>
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Password {!editingId && '*'}</label>
+                          <div style={{ position: 'relative' }}>
+                            <input
+                              required={!editingId}
+                              type={showPassword ? 'text' : 'password'}
+                              value={form.password}
+                              onChange={(e) => setForm({ ...form, password: e.target.value })}
+                              placeholder={editingId ? 'Leave blank to keep current' : 'API Password'}
+                              style={{ ...inputStyle, paddingRight: '40px' }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              style={{
+                                position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                                background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-tertiary)',
+                                padding: '4px', display: 'flex'
+                              }}
+                            >
+                              {showPassword ? <EyeOff style={{ width: '14px', height: '14px' }} /> : <Eye style={{ width: '14px', height: '14px' }} />}
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Customer Code</label>
+                          <input
+                            value={form.customer_code}
+                            onChange={(e) => setForm({ ...form, customer_code: e.target.value })}
+                            placeholder="e.g., XYZ123"
+                            style={inputStyle}
+                          />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Company Code</label>
+                          <input
+                            value={form.company_code}
+                            onChange={(e) => setForm({ ...form, company_code: e.target.value })}
+                            placeholder="e.g., BS"
+                            style={inputStyle}
+                          />
                         </div>
                       </div>
-                      <div>
-                        <label style={labelStyle}>Customer Code</label>
-                        <input
-                          value={form.customer_code}
-                          onChange={(e) => setForm({ ...form, customer_code: e.target.value })}
-                          placeholder="e.g., XYZ123"
-                          style={inputStyle}
-                        />
-                      </div>
-                      <div>
-                        <label style={labelStyle}>Company Code</label>
-                        <input
-                          value={form.company_code}
-                          onChange={(e) => setForm({ ...form, company_code: e.target.value })}
-                          placeholder="e.g., BS"
-                          style={inputStyle}
-                        />
-                      </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* ── Section: Shipment API ── */}
-                  <SectionLabel>Shipment API</SectionLabel>
+                  <SectionLabel>{form.auth_type === 'manual' ? 'Shipment & Public API Settings' : 'Shipment API'}</SectionLabel>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginBottom: '24px' }}>
                     <div>
-                      <label style={labelStyle}>Shipment API Endpoint *</label>
+                      <label style={labelStyle}>Shipment API Endpoint {form.auth_type !== 'manual' && '*'}</label>
                       <input
-                        required
+                        required={form.auth_type !== 'manual'}
                         value={form.shipment_api_url}
                         onChange={(e) => setForm({ ...form, shipment_api_url: e.target.value })}
-                        placeholder="https://api.vendor.com/shipment/create_docket"
+                        placeholder={form.auth_type === 'manual' ? 'Optional (Served via /api/v1/manual-vendor/...)' : 'https://api.vendor.com/shipment/create_docket'}
                         style={{ ...inputStyle, fontFamily: "'JetBrains Mono', monospace", fontSize: '12px' }}
                       />
                     </div>
@@ -2323,6 +2360,14 @@ export default function ApiSettingsPage() {
           </div>
         </div>,
         document.body
+      )}
+
+      {/* Manual Vendor Entries Modal */}
+      {manualEntriesVendor && (
+        <ManualVendorEntriesModal
+          vendor={manualEntriesVendor}
+          onClose={() => setManualEntriesVendor(null)}
+        />
       )}
 
       {/* Spin animation for loaders */}

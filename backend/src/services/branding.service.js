@@ -18,6 +18,7 @@ export const DEFAULT_BRANDING = {
   firm_tagline: 'Fast, Secure & Worldwide Logistics',
   firm_logo: '',
   firm_logo_path: '',
+  favicon_bg_color: '#ffffff',
   color_primary: '#2563EB',      // Modern Royal Blue
   color_primary_dark: '#1D4ED8',
   color_primary_light: '#3B82F6',
@@ -75,7 +76,7 @@ export async function getCompanyBranding() {
   const local = getLocalBranding()
   try {
     const rows = await query(
-      "SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('firm_name', 'firm_tagline', 'firm_logo', 'color_primary', 'color_accent', 'color_sidebar', 'firm_phone', 'firm_email', 'firm_website', 'firm_address', 'firm_gstin', 'currency_symbol', 'invoice_prefix', 'tracking_prefix', 'is_setup_complete')"
+      "SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('firm_name', 'firm_tagline', 'firm_logo', 'favicon_bg_color', 'color_primary', 'color_accent', 'color_sidebar', 'firm_phone', 'firm_email', 'firm_website', 'firm_address', 'firm_gstin', 'currency_symbol', 'invoice_prefix', 'tracking_prefix', 'is_setup_complete')"
     )
     if (Array.isArray(rows) && rows.length > 0) {
       const dbSettings = {}

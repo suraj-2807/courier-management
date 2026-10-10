@@ -19,12 +19,16 @@ import {
   Info,
   ShieldAlert,
   X,
-  CreditCard
+  CreditCard,
+  Hash,
+  Layers,
+  Layout,
+  ExternalLink
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useBrandingStore } from '../store/brandingStore'
 import { useAuthStore } from '../store/authStore'
-import { saveCompanyBranding, resetPortal, getPublicBranding } from '../api/setup.api'
+import { saveCompanyBranding, resetPortal } from '../api/setup.api'
 
 const COLOR_PRESETS = [
   { name: 'Ventorie Emerald', primary: '#10B981', accent: '#0F1014' },
@@ -33,6 +37,14 @@ const COLOR_PRESETS = [
   { name: 'Oceanic Teal', primary: '#0D9488', accent: '#0F172A' },
   { name: 'Royal Blue', primary: '#2563EB', accent: '#0F172A' },
   { name: 'Midnight Violet', primary: '#7C3AED', accent: '#18181B' }
+]
+
+const FAVICON_BG_PRESETS = [
+  { name: 'Crisp White', color: '#ffffff' },
+  { name: 'Dark Navy', color: '#0F172A' },
+  { name: 'Charcoal', color: '#111827' },
+  { name: 'Soft Gray', color: '#F1F5F9' },
+  { name: 'Brand Accent', color: 'primary' }
 ]
 
 export default function SettingsPage() {
@@ -53,6 +65,7 @@ export default function SettingsPage() {
   const [formData, setFormData] = useState({
     firm_name: branding?.firm_name || 'SK Courier',
     firm_tagline: branding?.firm_tagline || 'Enterprise Logistics Control Center',
+    favicon_bg_color: branding?.favicon_bg_color || '#ffffff',
     color_primary: branding?.color_primary || '#10B981',
     color_accent: branding?.color_accent || '#0F1014',
     color_sidebar: branding?.color_sidebar || 'navy',
@@ -72,6 +85,7 @@ export default function SettingsPage() {
       setFormData({
         firm_name: branding.firm_name || 'SK Courier',
         firm_tagline: branding.firm_tagline || 'Enterprise Logistics Control Center',
+        favicon_bg_color: branding.favicon_bg_color || '#ffffff',
         color_primary: branding.color_primary || '#10B981',
         color_accent: branding.color_accent || '#0F1014',
         color_sidebar: branding.color_sidebar || 'navy',
@@ -151,57 +165,102 @@ export default function SettingsPage() {
     }
   }
 
+  const currentFavBg = formData.favicon_bg_color || '#ffffff'
+
   return (
-    <div className="space-y-6 animate-fade-in max-w-6xl mx-auto pb-12">
+    <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-16">
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-[22px] font-extrabold text-navy tracking-tight flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-              <Settings className="w-5 h-5" />
-            </div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary mb-2 border border-primary/20">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Workspace Customization</span>
+          </div>
+          <h1 className="text-2xl font-extrabold text-navy tracking-tight flex items-center gap-3">
             General Settings & Branding
           </h1>
-          <p className="text-[13px] text-text-tertiary mt-1">
-            Customize firm name, logos, favicon with white background, color palettes, and invoice parameters.
+          <p className="text-xs sm:text-sm text-text-tertiary mt-1">
+            Configure firm identity, tab favicon background color, color schemes, and system numbering parameters.
           </p>
         </div>
 
         <button
           onClick={handleSaveBranding}
           disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-primary hover:bg-primary-dark rounded-xl shadow-xs transition-all cursor-pointer self-start sm:self-center"
+          className="flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-primary hover:bg-primary-dark active:scale-[0.98] rounded-xl shadow-md shadow-primary/20 transition-all cursor-pointer self-start sm:self-center"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
           <span>Save Changes</span>
         </button>
       </div>
 
-      <form onSubmit={handleSaveBranding} className="space-y-6">
-        {/* ── Card 1: Brand Identity & Logo ── */}
-        <div className="bg-surface rounded-2xl border border-border p-6 shadow-xs space-y-6">
-          <div className="border-b border-border-light pb-4">
-            <h2 className="text-[15px] font-extrabold text-navy flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-primary" />
-              Firm Identity & Live Favicon
-            </h2>
-            <p className="text-[12px] text-text-tertiary mt-0.5">
-              Your logo is rendered on a clean white background to serve as the crisp site favicon on all browser tabs.
-            </p>
+      <form onSubmit={handleSaveBranding} className="space-y-8">
+        {/* ── Card 1: Brand Identity & Live Favicon ── */}
+        <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
+          <div className="p-6 border-b border-border-light bg-gradient-to-r from-surface to-surface-alt/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base font-extrabold text-navy flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <Building2 className="w-4 h-4" />
+                </div>
+                Firm Identity & Live Favicon
+              </h2>
+              <p className="text-xs text-text-tertiary mt-1">
+                Customize your firm name, high-resolution logo, and customizable browser tab favicon background.
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface border border-border text-[11px] font-bold text-text-secondary">
+              <span>Favicon BG:</span>
+              <span className="w-3 h-3 rounded-full border border-border inline-block shadow-xs" style={{ backgroundColor: currentFavBg }} />
+              <span className="font-mono text-[10px] uppercase">{currentFavBg}</span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Logo Upload & Favicon Preview */}
-            <div className="lg:col-span-1 space-y-3">
-              <label className="block text-[12px] font-bold text-navy">
-                Firm Logo & Tab Favicon
+          <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Logo Upload & Favicon Simulation */}
+            <div className="lg:col-span-5 space-y-4">
+              <label className="block text-xs font-bold text-navy">
+                Logo & Tab Favicon Preview
               </label>
 
-              {/* White Background Favicon Frame */}
-              <div className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-border bg-surface-alt text-center">
+              {/* Realistic Browser Tab Simulation */}
+              <div className="p-4 rounded-xl border border-border/80 bg-slate-900/5 dark:bg-slate-950/40">
+                <div className="text-[11px] font-bold text-text-tertiary uppercase tracking-wider mb-2 flex items-center justify-between">
+                  <span>Browser Tab Simulation</span>
+                  <span className="text-[10px] font-normal lowercase text-text-tertiary">Real-time sync</span>
+                </div>
+                
+                {/* Simulated Tab Bar */}
+                <div className="bg-slate-200/70 dark:bg-slate-800/60 p-2 pb-0 rounded-t-xl border border-slate-300/60 dark:border-slate-700/60 flex items-center">
+                  <div className="bg-white dark:bg-slate-900 border-t border-x border-slate-300/80 dark:border-slate-700 rounded-t-lg px-3 py-1.5 flex items-center gap-2 max-w-[240px] shadow-xs">
+                    {/* The Mini Tab Favicon */}
+                    <div
+                      className="w-4 h-4 rounded-xs flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xs transition-all"
+                      style={{ backgroundColor: currentFavBg }}
+                    >
+                      {logoPreview ? (
+                        <img src={logoPreview} alt="Favicon" className="w-3.5 h-3.5 object-contain p-0.5" />
+                      ) : (
+                        <span className="text-[8px] font-extrabold text-primary leading-none">
+                          {(formData.firm_name || 'SK').slice(0, 2).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">
+                      {formData.firm_name || 'SK Courier'} — Admin
+                    </span>
+                    <span className="text-slate-400 hover:text-slate-600 text-[10px] ml-auto cursor-pointer">×</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Favicon Canvas Frame */}
+              <div className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-border/90 bg-surface-alt/40 text-center">
                 <div className="relative group">
-                  {/* The crisp white background container */}
-                  <div className="w-24 h-24 rounded-2xl bg-white shadow-md border border-slate-200 flex items-center justify-center p-3 overflow-hidden">
+                  <div
+                    className="w-24 h-24 rounded-2xl shadow-lg border border-border flex items-center justify-center p-3.5 overflow-hidden transition-all duration-300"
+                    style={{ backgroundColor: currentFavBg }}
+                  >
                     {logoPreview ? (
                       <img
                         src={logoPreview}
@@ -209,20 +268,25 @@ export default function SettingsPage() {
                         className="w-full h-full object-contain"
                       />
                     ) : (
-                      <Building2 className="w-10 h-10 text-slate-300" />
+                      <div className="flex flex-col items-center justify-center">
+                        <Building2 className="w-8 h-8 text-primary/60 mb-1" />
+                        <span className="text-[10px] font-extrabold text-navy">
+                          {(formData.firm_name || 'SK').slice(0, 2).toUpperCase()}
+                        </span>
+                      </div>
                     )}
                   </div>
-                  <span className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-1 rounded-full shadow-xs">
-                    <Check className="w-3 h-3" />
+                  <span className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-1 rounded-full shadow-md">
+                    <Check className="w-3.5 h-3.5" />
                   </span>
                 </div>
 
-                <div className="mt-3 text-center">
-                  <span className="text-[11px] font-bold text-navy block">
-                    White Background Favicon
+                <div className="mt-4 text-center">
+                  <span className="text-xs font-bold text-navy block">
+                    Dynamic Favicon Container
                   </span>
-                  <span className="text-[10px] text-text-tertiary">
-                    Auto-synchronized to browser tab
+                  <span className="text-[11px] text-text-tertiary">
+                    Synchronizes live to browser tab icon
                   </span>
                 </div>
 
@@ -234,290 +298,429 @@ export default function SettingsPage() {
                   className="hidden"
                 />
 
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-navy bg-white hover:bg-slate-50 border border-border rounded-xl transition-colors cursor-pointer shadow-xs"
-                >
-                  <Upload className="w-3.5 h-3.5 text-primary" />
-                  <span>Choose New Logo</span>
-                </button>
+                <div className="flex items-center gap-2 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-navy bg-surface hover:bg-surface-hover border border-border rounded-xl transition-all cursor-pointer shadow-xs hover:border-primary/40"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-primary" />
+                    <span>Upload New Logo</span>
+                  </button>
+                  {logoPreview && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLogoFile(null)
+                        setLogoPreview('')
+                        setFormData({ ...formData, firm_logo: '' })
+                      }}
+                      className="p-2 text-text-tertiary hover:text-red-600 rounded-xl hover:bg-red-50 border border-transparent hover:border-red-200 transition-colors"
+                      title="Clear logo"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Favicon Background Color Chooser */}
+              <div className="p-4 rounded-xl border border-border bg-surface space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-navy flex items-center gap-1.5">
+                    <Palette className="w-3.5 h-3.5 text-primary" />
+                    Favicon Background Color
+                  </label>
+                  <span className="text-[11px] font-mono text-text-tertiary uppercase">
+                    {currentFavBg}
+                  </span>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="flex flex-wrap gap-2">
+                  {FAVICON_BG_PRESETS.map((p) => {
+                    const presetColor = p.color === 'primary' ? formData.color_primary : p.color
+                    const isSelected = currentFavBg.toLowerCase() === presetColor.toLowerCase()
+                    return (
+                      <button
+                        key={p.name}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, favicon_bg_color: presetColor })}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer ${
+                          isSelected
+                            ? 'border-primary ring-2 ring-primary/20 bg-primary/5 text-primary'
+                            : 'border-border bg-surface-alt hover:bg-surface-hover text-text-secondary'
+                        }`}
+                      >
+                        <span
+                          className="w-3.5 h-3.5 rounded-full border border-border shadow-2xs"
+                          style={{ backgroundColor: presetColor }}
+                        />
+                        <span>{p.name}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Custom Picker */}
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="relative">
+                    <input
+                      type="color"
+                      value={currentFavBg}
+                      onChange={(e) => setFormData({ ...formData, favicon_bg_color: e.target.value })}
+                      className="w-9 h-9 rounded-xl cursor-pointer border border-border p-0.5 bg-surface"
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.favicon_bg_color}
+                    onChange={(e) => setFormData({ ...formData, favicon_bg_color: e.target.value })}
+                    placeholder="#ffffff"
+                    className="flex-1 px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-mono font-bold uppercase text-text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Firm Name & Tagline */}
-            <div className="lg:col-span-2 space-y-4">
+            {/* Firm Details Fields */}
+            <div className="lg:col-span-7 space-y-5">
               <div>
-                <label className="block text-[12px] font-bold text-navy mb-1.5">
-                  Firm Name *
+                <label className="block text-xs font-bold text-navy mb-1.5">
+                  Firm Name <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.firm_name}
-                  onChange={(e) => setFormData({ ...formData, firm_name: e.target.value })}
-                  placeholder="e.g. SK Courier & Cargo"
-                  className="w-full px-3.5 py-2.5 bg-surface-alt border border-border rounded-xl text-sm font-semibold text-text-primary focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
-                />
+                <div className="relative">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={formData.firm_name}
+                    onChange={(e) => setFormData({ ...formData, firm_name: e.target.value })}
+                    placeholder="e.g. SK Courier & Cargo"
+                    className="w-full pl-10 pr-4 py-2.5 bg-surface-alt border border-border rounded-xl text-sm font-semibold text-text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-[12px] font-bold text-navy mb-1.5">
+                <label className="block text-xs font-bold text-navy mb-1.5">
                   Firm Tagline / Subtitle
                 </label>
-                <input
-                  type="text"
-                  value={formData.firm_tagline}
-                  onChange={(e) => setFormData({ ...formData, firm_tagline: e.target.value })}
-                  placeholder="e.g. Enterprise Logistics Control Center"
-                  className="w-full px-3.5 py-2.5 bg-surface-alt border border-border rounded-xl text-sm font-semibold text-text-primary focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
-                />
+                <div className="relative">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
+                    <TagIcon className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.firm_tagline}
+                    onChange={(e) => setFormData({ ...formData, firm_tagline: e.target.value })}
+                    placeholder="e.g. Enterprise Logistics Control Center"
+                    className="w-full pl-10 pr-4 py-2.5 bg-surface-alt border border-border rounded-xl text-sm font-semibold text-text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[12px] font-bold text-navy mb-1.5">
-                    GSTIN / Tax ID
+                  <label className="block text-xs font-bold text-navy mb-1.5">
+                    GSTIN / Tax Registration ID
                   </label>
-                  <input
-                    type="text"
-                    value={formData.firm_gstin}
-                    onChange={(e) => setFormData({ ...formData, firm_gstin: e.target.value })}
-                    placeholder="e.g. 07AAAAA0000A1Z5"
-                    className="w-full px-3.5 py-2.5 bg-surface-alt border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-primary/50 transition-all"
-                  />
+                  <div className="relative">
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
+                      <CreditCard className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.firm_gstin}
+                      onChange={(e) => setFormData({ ...formData, firm_gstin: e.target.value })}
+                      placeholder="e.g. 07AAAAA0000A1Z5"
+                      className="w-full pl-10 pr-4 py-2.5 bg-surface-alt border border-border rounded-xl text-xs font-mono font-bold text-text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                    />
+                  </div>
                 </div>
+
                 <div>
-                  <label className="block text-[12px] font-bold text-navy mb-1.5">
+                  <label className="block text-xs font-bold text-navy mb-1.5">
                     Currency Symbol
                   </label>
-                  <input
-                    type="text"
-                    value={formData.currency_symbol}
-                    onChange={(e) => setFormData({ ...formData, currency_symbol: e.target.value })}
-                    placeholder="₹"
-                    className="w-full px-3.5 py-2.5 bg-surface-alt border border-border rounded-xl text-sm font-semibold text-text-primary focus:outline-none focus:border-primary/50 transition-all"
-                  />
+                  <div className="relative">
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
+                      <span className="text-sm font-bold">₹</span>
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.currency_symbol}
+                      onChange={(e) => setFormData({ ...formData, currency_symbol: e.target.value })}
+                      placeholder="₹"
+                      className="w-full pl-10 pr-4 py-2.5 bg-surface-alt border border-border rounded-xl text-sm font-bold text-text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                    />
+                  </div>
                 </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-primary/5 border border-primary/15 flex items-start gap-3">
+                <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  The firm identity and primary brand color are globally applied to invoices, dispatch waybills, dashboard cards, customer portal headers, and browser tabs.
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── Card 2: Color Palette & Aesthetics ── */}
-        <div className="bg-surface rounded-2xl border border-border p-6 shadow-xs space-y-6">
-          <div className="border-b border-border-light pb-4">
-            <h2 className="text-[15px] font-extrabold text-navy flex items-center gap-2">
-              <Palette className="w-4 h-4 text-primary" />
-              Theme & Color Palette
+        {/* ── Card 2: Theme & Color Palette ── */}
+        <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
+          <div className="p-6 border-b border-border-light bg-gradient-to-r from-surface to-surface-alt/50">
+            <h2 className="text-base font-extrabold text-navy flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <Palette className="w-4 h-4" />
+              </div>
+              Theme & Dynamic Color Palette
             </h2>
-            <p className="text-[12px] text-text-tertiary mt-0.5">
-              Select tailored color themes or pick custom brand accents.
+            <p className="text-xs text-text-tertiary mt-1">
+              Select one of our curated enterprise design palettes or customize your brand colors.
             </p>
           </div>
 
-          {/* Color Presets */}
-          <div>
-            <label className="block text-[12px] font-bold text-navy mb-2">
-              Quick Theme Presets
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
-              {COLOR_PRESETS.map((p) => {
-                const isSelected = formData.color_primary.toLowerCase() === p.primary.toLowerCase()
-                return (
-                  <button
-                    key={p.name}
-                    type="button"
-                    onClick={() => {
-                      setFormData({
-                        ...formData,
-                        color_primary: p.primary,
-                        color_accent: p.accent
-                      })
-                    }}
-                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-                      isSelected
-                        ? 'border-primary ring-2 ring-primary/20 bg-primary/5'
-                        : 'border-border bg-surface-alt hover:bg-surface-hover'
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-4 h-4 rounded-full shadow-xs" style={{ backgroundColor: p.primary }} />
-                      <span className="w-3 h-3 rounded-full shadow-xs" style={{ backgroundColor: p.accent }} />
-                    </div>
-                    <span className="text-[11px] font-bold text-navy truncate">
-                      {p.name}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+          <div className="p-6 space-y-6">
+            {/* Quick Themes */}
             <div>
-              <label className="block text-[12px] font-bold text-navy mb-1.5">
-                Primary Brand Color
+              <label className="block text-xs font-bold text-navy mb-3">
+                Curated Theme Presets
               </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={formData.color_primary}
-                  onChange={(e) => setFormData({ ...formData, color_primary: e.target.value })}
-                  className="w-10 h-10 rounded-xl cursor-pointer border border-border p-0.5 bg-surface"
-                />
-                <input
-                  type="text"
-                  value={formData.color_primary}
-                  onChange={(e) => setFormData({ ...formData, color_primary: e.target.value })}
-                  className="flex-1 px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-mono font-bold uppercase text-text-primary"
-                />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                {COLOR_PRESETS.map((p) => {
+                  const isSelected = formData.color_primary.toLowerCase() === p.primary.toLowerCase()
+                  return (
+                    <button
+                      key={p.name}
+                      type="button"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          color_primary: p.primary,
+                          color_accent: p.accent
+                        })
+                      }}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2.5 hover:scale-[1.02] ${
+                        isSelected
+                          ? 'border-primary ring-2 ring-primary/20 bg-primary/5 shadow-xs'
+                          : 'border-border bg-surface-alt hover:bg-surface-hover'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full shadow-xs border border-white/40" style={{ backgroundColor: p.primary }} />
+                        <span className="w-3.5 h-3.5 rounded-full shadow-xs border border-white/40" style={{ backgroundColor: p.accent }} />
+                      </div>
+                      <span className="text-[11px] font-bold text-navy truncate">
+                        {p.name}
+                      </span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
-            <div>
-              <label className="block text-[12px] font-bold text-navy mb-1.5">
-                Accent / Dark Accent
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={formData.color_accent}
-                  onChange={(e) => setFormData({ ...formData, color_accent: e.target.value })}
-                  className="w-10 h-10 rounded-xl cursor-pointer border border-border p-0.5 bg-surface"
-                />
-                <input
-                  type="text"
-                  value={formData.color_accent}
-                  onChange={(e) => setFormData({ ...formData, color_accent: e.target.value })}
-                  className="flex-1 px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-mono font-bold uppercase text-text-primary"
-                />
+            {/* Custom Colors Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-2 border-t border-border-light">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-navy">
+                  Primary Brand Color
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={formData.color_primary}
+                    onChange={(e) => setFormData({ ...formData, color_primary: e.target.value })}
+                    className="w-10 h-10 rounded-xl cursor-pointer border border-border p-0.5 bg-surface"
+                  />
+                  <input
+                    type="text"
+                    value={formData.color_primary}
+                    onChange={(e) => setFormData({ ...formData, color_primary: e.target.value })}
+                    className="flex-1 px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-mono font-bold uppercase text-text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-[12px] font-bold text-navy mb-1.5">
-                Sidebar Style
-              </label>
-              <select
-                value={formData.color_sidebar}
-                onChange={(e) => setFormData({ ...formData, color_sidebar: e.target.value })}
-                className="w-full px-3 py-2.5 bg-surface-alt border border-border rounded-xl text-xs font-bold text-text-primary"
-              >
-                <option value="navy">Enterprise Deep Navy</option>
-                <option value="dark">Charcoal Black (#111827)</option>
-                <option value="primary">Brand Tinted Navy</option>
-              </select>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-navy">
+                  Accent / Contrast Tone
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={formData.color_accent}
+                    onChange={(e) => setFormData({ ...formData, color_accent: e.target.value })}
+                    className="w-10 h-10 rounded-xl cursor-pointer border border-border p-0.5 bg-surface"
+                  />
+                  <input
+                    type="text"
+                    value={formData.color_accent}
+                    onChange={(e) => setFormData({ ...formData, color_accent: e.target.value })}
+                    className="flex-1 px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-mono font-bold uppercase text-text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-navy">
+                  Sidebar Theme Style
+                </label>
+                <select
+                  value={formData.color_sidebar}
+                  onChange={(e) => setFormData({ ...formData, color_sidebar: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-surface-alt border border-border rounded-xl text-xs font-bold text-text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                >
+                  <option value="navy">Enterprise Deep Navy</option>
+                  <option value="dark">Charcoal Black (#111827)</option>
+                  <option value="primary">Brand Tinted Navy</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
 
         {/* ── Card 3: Contact & Document Prefixes ── */}
-        <div className="bg-surface rounded-2xl border border-border p-6 shadow-xs space-y-6">
-          <div className="border-b border-border-light pb-4">
-            <h2 className="text-[15px] font-extrabold text-navy flex items-center gap-2">
-              <Phone className="w-4 h-4 text-primary" />
-              Company Contact & Invoicing
+        <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
+          <div className="p-6 border-b border-border-light bg-gradient-to-r from-surface to-surface-alt/50">
+            <h2 className="text-base font-extrabold text-navy flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <Phone className="w-4 h-4" />
+              </div>
+              Contact Details & Serial Prefixes
             </h2>
-            <p className="text-[12px] text-text-tertiary mt-0.5">
-              Contact numbers, support email, and document numbering prefixes.
+            <p className="text-xs text-text-tertiary mt-1">
+              Contact numbers, support inbox, and automatic serial numbering prefixes for shipments and invoices.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <div>
-              <label className="block text-[12px] font-bold text-navy mb-1.5">
+              <label className="block text-xs font-bold text-navy mb-1.5">
                 Phone Number
               </label>
-              <input
-                type="text"
-                value={formData.firm_phone}
-                onChange={(e) => setFormData({ ...formData, firm_phone: e.target.value })}
-                placeholder="+91 98765 43210"
-                className="w-full px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-medium text-text-primary"
-              />
+              <div className="relative">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  value={formData.firm_phone}
+                  onChange={(e) => setFormData({ ...formData, firm_phone: e.target.value })}
+                  placeholder="+91 98765 43210"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt border border-border rounded-xl text-xs font-semibold text-text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-[12px] font-bold text-navy mb-1.5">
+              <label className="block text-xs font-bold text-navy mb-1.5">
                 Support Email
               </label>
-              <input
-                type="email"
-                value={formData.firm_email}
-                onChange={(e) => setFormData({ ...formData, firm_email: e.target.value })}
-                placeholder="support@courierexpress.com"
-                className="w-full px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-medium text-text-primary"
-              />
+              <div className="relative">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <input
+                  type="email"
+                  value={formData.firm_email}
+                  onChange={(e) => setFormData({ ...formData, firm_email: e.target.value })}
+                  placeholder="support@courierexpress.com"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt border border-border rounded-xl text-xs font-semibold text-text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-[12px] font-bold text-navy mb-1.5">
+              <label className="block text-xs font-bold text-navy mb-1.5">
                 Website
               </label>
-              <input
-                type="text"
-                value={formData.firm_website}
-                onChange={(e) => setFormData({ ...formData, firm_website: e.target.value })}
-                placeholder="www.courierexpress.com"
-                className="w-full px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-medium text-text-primary"
-              />
+              <div className="relative">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
+                  <Globe className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  value={formData.firm_website}
+                  onChange={(e) => setFormData({ ...formData, firm_website: e.target.value })}
+                  placeholder="www.courierexpress.com"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt border border-border rounded-xl text-xs font-semibold text-text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                />
+              </div>
             </div>
 
             <div className="sm:col-span-2 lg:col-span-3">
-              <label className="block text-[12px] font-bold text-navy mb-1.5">
+              <label className="block text-xs font-bold text-navy mb-1.5">
                 Headquarters Address
               </label>
-              <input
-                type="text"
-                value={formData.firm_address}
-                onChange={(e) => setFormData({ ...formData, firm_address: e.target.value })}
-                placeholder="Main Logistics Hub, Cargo Terminal, City - 110001"
-                className="w-full px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-medium text-text-primary"
-              />
+              <div className="relative">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  value={formData.firm_address}
+                  onChange={(e) => setFormData({ ...formData, firm_address: e.target.value })}
+                  placeholder="Main Logistics Hub, Cargo Terminal, City - 110001"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt border border-border rounded-xl text-xs font-semibold text-text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-[12px] font-bold text-navy mb-1.5">
+              <label className="block text-xs font-bold text-navy mb-1.5">
                 Invoice Number Prefix
               </label>
-              <input
-                type="text"
-                value={formData.invoice_prefix}
-                onChange={(e) => setFormData({ ...formData, invoice_prefix: e.target.value })}
-                placeholder="INV-"
-                className="w-full px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-mono font-bold text-text-primary"
-              />
+              <div className="relative">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  value={formData.invoice_prefix}
+                  onChange={(e) => setFormData({ ...formData, invoice_prefix: e.target.value })}
+                  placeholder="INV-"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt border border-border rounded-xl text-xs font-mono font-bold text-text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-[12px] font-bold text-navy mb-1.5">
+              <label className="block text-xs font-bold text-navy mb-1.5">
                 Tracking Number Prefix
               </label>
-              <input
-                type="text"
-                value={formData.tracking_prefix}
-                onChange={(e) => setFormData({ ...formData, tracking_prefix: e.target.value })}
-                placeholder="EXP"
-                className="w-full px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-mono font-bold text-text-primary"
-              />
+              <div className="relative">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
+                  <Hash className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  value={formData.tracking_prefix}
+                  onChange={(e) => setFormData({ ...formData, tracking_prefix: e.target.value })}
+                  placeholder="EXP"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt border border-border rounded-xl text-xs font-mono font-bold text-text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                />
+              </div>
             </div>
           </div>
         </div>
 
         {/* ── Card 4: Danger Zone / Portal Reset ── */}
         {userIsSuperAdmin && (
-          <div className="bg-red-50/40 rounded-2xl border border-red-200 p-6 space-y-4">
+          <div className="bg-red-50/50 rounded-2xl border border-red-200/80 p-6 space-y-4">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div className="flex items-start gap-3.5">
                 <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 border border-red-200">
                   <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-[15px] font-extrabold text-red-900">
+                  <h3 className="text-sm sm:text-base font-extrabold text-red-900">
                     System Maintenance: Reset Portal & Database Setup
                   </h3>
-                  <p className="text-[12px] text-red-700/80 mt-1 max-w-2xl leading-relaxed">
+                  <p className="text-xs text-red-700/80 mt-1 max-w-2xl leading-relaxed">
                     Database credentials are locked to protect production integrity. Database connection setup is only requested if you initiate a full portal setup reset. Use this only if migrating servers or reconnecting to a new MySQL database.
                   </p>
                 </div>
@@ -557,12 +760,12 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <p className="text-xs text-text-secondary leading-relaxed bg-surface-alt p-3 rounded-xl border border-border-light">
+            <p className="text-xs text-text-secondary leading-relaxed bg-surface-alt p-3.5 rounded-xl border border-border-light">
               This action will return the portal to <strong>Setup Mode</strong>. You will be prompted to re-enter your database credentials (Host, User, Password, DB Name) upon next access.
             </p>
 
             <div>
-              <label className="block text-[11px] font-bold text-text-tertiary uppercase mb-1">
+              <label className="block text-[11px] font-bold text-text-tertiary uppercase mb-1.5">
                 Type <span className="text-red-600 font-extrabold">RESET</span> below to confirm:
               </label>
               <input
@@ -570,7 +773,7 @@ export default function SettingsPage() {
                 placeholder="RESET"
                 value={resetConfirmText}
                 onChange={(e) => setResetConfirmText(e.target.value)}
-                className="w-full px-3 py-2 bg-surface-alt border border-border rounded-xl text-xs font-bold text-text-primary focus:outline-none focus:border-red-500"
+                className="w-full px-3.5 py-2.5 bg-surface-alt border border-border rounded-xl text-xs font-bold text-text-primary focus:outline-none focus:border-red-500 transition-all"
               />
             </div>
 
@@ -586,7 +789,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={handleResetPortal}
                 disabled={resetting || resetConfirmText.trim().toLowerCase() !== 'reset'}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-40 transition-all cursor-pointer shadow-xs"
+                className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-40 transition-all cursor-pointer shadow-xs"
               >
                 {resetting ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
                 <span>Confirm & Reset</span>
@@ -596,5 +799,22 @@ export default function SettingsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+function TagIcon(props) {
+  return (
+    <svg
+      {...props}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+      <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+    </svg>
   )
 }

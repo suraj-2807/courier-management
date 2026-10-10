@@ -17,6 +17,7 @@ import customersRoutes from '../modules/customer/customers.routes.js'
 import vendorRateImportRoutes from '../modules/vendorRateImport/vendorRateImport.routes.js'
 import setupRoutes from '../modules/setup/setup.routes.js'
 import usersRoutes from '../modules/users/users.routes.js'
+import manualEntriesRoutes, { publicManualVendorRouter } from '../modules/manualEntries/manualEntries.routes.js'
 
 const router = express.Router()
 
@@ -38,6 +39,8 @@ router.use('/bookings', bookingRoutes)
 router.use('/tracking', trackingRoutes)
 router.use('/dashboard', dashboardRoutes)
 router.use('/api-settings', apiSettingsRoutes)
+router.use('/manual-entries', manualEntriesRoutes)
+router.use('/v1/manual-vendor', publicManualVendorRouter)
 router.use('/system-settings', systemSettingsRoutes)
 router.use('/rates', ratesRoutes)
 router.use('/booking-requests', bookingRequestRoutes)

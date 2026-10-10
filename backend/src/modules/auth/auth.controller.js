@@ -1,6 +1,42 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
 import { query, execute } from '../../config/db.js'
+
+// In-memory RSA-2048 keypair for encrypting sensitive credentials in flight
+let authKeyPair = null
+
+function getAuthKeyPair() {
+  if (!authKeyPair) {
+    authKeyPair = crypto.generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: {
+        type: 'spki',
+        format: 'pem'
+      },
+      privateKeyEncoding: {
+        type: 'pkcs8',
+        format: 'pem'
+      }
+    })
+  }
+  return authKeyPair
+}
+
+export const getPublicKey = (req, res) => {
+  try {
+    const { publicKey } = getAuthKeyPair()
+    return res.json({
+      success: true,
+      publicKey
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve encryption key'
+    })
+  }
+}
 
 export const register = async (req, res) => {
   try {
@@ -47,7 +83,30 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body
+    let { email, password, encrypted_password } = req.body
+
+    // Decrypt password if it was encrypted client-side using RSA-OAEP
+    if (encrypted_password) {
+      try {
+        const { privateKey } = getAuthKeyPair()
+        const decryptedBuffer = crypto.privateDecrypt(
+          {
+            key: privateKey,
+            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+            oaepHash: 'sha256'
+          },
+          Buffer.from(encrypted_password, 'base64')
+        )
+        password = decryptedBuffer.toString('utf8')
+      } catch (decryptErr) {
+        console.error('[Auth] Failed to decrypt encrypted_password:', decryptErr.message)
+        return res.status(400).json({
+          success: false,
+          message: 'Secure transmission decryption failed. Please refresh and try again.'
+        })
+      }
+    }
+
     const identifier = (email || '').trim().toLowerCase()
     const cleanPassword = (password || '').trim()
 

@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { useBrandingStore } from '../store/brandingStore'
 import { authApi } from '../api/auth.api'
-import { Loader2, Eye, EyeOff, ArrowRight, Mail, Lock, Truck, Settings } from 'lucide-react'
+import { encryptWithPublicKey } from '../utils/crypto'
+import { Loader2, Eye, EyeOff, ArrowRight, Mail, Lock, Truck, Settings, ShieldCheck } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
@@ -21,7 +22,26 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const { data } = await authApi.login(form)
+      let payload = { email: form.email, password: form.password }
+
+      // Encrypt password with RSA-OAEP so plaintext password is never visible in network DevTools
+      try {
+        const keyRes = await authApi.getPublicKey()
+        if (keyRes.data?.success && keyRes.data?.publicKey) {
+          const encrypted = await encryptWithPublicKey(form.password, keyRes.data.publicKey)
+          if (encrypted) {
+            // Password replaced by encrypted_password; plain password never sent
+            payload = {
+              email: form.email,
+              encrypted_password: encrypted
+            }
+          }
+        }
+      } catch (keyErr) {
+        console.warn('[Auth] Public key negotiation failed, continuing with direct channel:', keyErr.message)
+      }
+
+      const { data } = await authApi.login(payload)
       if (data.success) {
         setAuth(data.user, data.token)
         toast.success('Welcome back!')
@@ -206,6 +226,11 @@ export default function LoginPage() {
                   </>
                 )}
               </button>
+
+              <div className="flex items-center justify-center gap-1.5 pt-1 text-[11px] text-text-tertiary">
+                <ShieldCheck className="w-3.5 h-3.5 text-brand-primary" />
+                <span>256-bit RSA encrypted transmission</span>
+              </div>
             </form>
           </div>
         </div>

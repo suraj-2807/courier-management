@@ -283,7 +283,7 @@ export default function DashboardPage() {
                 <span
                   className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[11px] font-bold ${
                     card.isPositive
-                      ? 'bg-[#EBFDF2] text-[#15803D]'
+                      ? 'bg-brand-primary-subtle text-brand-primary'
                       : 'bg-[#FEF2F2] text-[#B91C1C]'
                   }`}
                 >
@@ -425,7 +425,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-1.5 mt-1">
               <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                !revenueTrend.startsWith('-') ? 'bg-[#EBFDF2] text-[#15803D]' : 'bg-[#FEF2F2] text-[#B91C1C]'
+                !revenueTrend.startsWith('-') ? 'bg-brand-primary-subtle text-brand-primary' : 'bg-[#FEF2F2] text-[#B91C1C]'
               }`}>
                 {revenueTrend}
               </span>

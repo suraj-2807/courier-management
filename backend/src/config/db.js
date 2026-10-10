@@ -903,6 +903,44 @@ export async function initializeDb() {
       console.warn('users table verification notice:', userErr.message)
     }
 
+    // ── Manual Vendor Entries (No-API Vendor) Table ──
+    try {
+      await execute(`CREATE TABLE IF NOT EXISTS manual_vendor_entries (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        vendor_config_id INT NOT NULL,
+        vendor_code VARCHAR(100) NOT NULL,
+        awb_number VARCHAR(100) NOT NULL,
+        order_ref VARCHAR(100) DEFAULT NULL,
+        sender_name VARCHAR(150) DEFAULT NULL,
+        sender_city VARCHAR(100) DEFAULT NULL,
+        receiver_name VARCHAR(150) DEFAULT NULL,
+        receiver_city VARCHAR(100) DEFAULT NULL,
+        destination_pincode VARCHAR(20) DEFAULT NULL,
+        service_code VARCHAR(50) DEFAULT NULL,
+        service_name VARCHAR(100) DEFAULT NULL,
+        weight_kg DECIMAL(10,3) DEFAULT 0.000,
+        pieces INT DEFAULT 1,
+        current_status VARCHAR(50) DEFAULT 'Booked',
+        current_location VARCHAR(100) DEFAULT NULL,
+        status_description VARCHAR(255) DEFAULT 'Shipment details created',
+        expected_delivery DATE DEFAULT NULL,
+        tracking_events JSON DEFAULT NULL,
+        custom_metadata JSON DEFAULT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_vendor_awb (vendor_code, awb_number),
+        INDEX idx_mve_awb (awb_number),
+        INDEX idx_mve_vendor (vendor_config_id),
+        INDEX idx_mve_status (current_status)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+      console.log('manual_vendor_entries table ready.')
+    } catch (mveErr) {
+      if (mveErr.code !== 'ER_TABLE_EXISTS_ERROR') {
+        console.error('manual_vendor_entries migration failed:', mveErr.message)
+      }
+    }
+
     console.log('DB initialization successfully completed!')
   } catch (err) {
     console.error('DB Initialization/Migration Failed:', err)
