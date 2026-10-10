@@ -35,6 +35,41 @@ export const DEFAULT_BRANDING = {
   is_setup_complete: 'false'
 }
 
+function resolveBrandingLogo(merged) {
+  if (merged.firm_logo) {
+    if (merged.firm_logo.startsWith('/uploads/')) {
+      const relPath = merged.firm_logo.replace(/^\/uploads\//, '')
+      const diskPath = path.resolve(__dirname, '..', '..', 'uploads', relPath)
+      if (fs.existsSync(diskPath)) {
+        merged.firm_logo_path = diskPath
+        return merged
+      }
+    } else if (fs.existsSync(merged.firm_logo)) {
+      merged.firm_logo_path = merged.firm_logo
+      return merged
+    }
+  }
+
+  // Fallback: If the specified logo is missing or not set, auto-discover any logo in uploads/branding
+  try {
+    if (fs.existsSync(UPLOADS_BRANDING_DIR)) {
+      const files = fs.readdirSync(UPLOADS_BRANDING_DIR).filter(f => /\.(png|jpe?g|webp|svg)$/i.test(f))
+      if (files.length > 0) {
+        files.sort((a, b) => {
+          const statA = fs.statSync(path.join(UPLOADS_BRANDING_DIR, a))
+          const statB = fs.statSync(path.join(UPLOADS_BRANDING_DIR, b))
+          return statB.mtimeMs - statA.mtimeMs
+        })
+        const chosen = files[0]
+        merged.firm_logo = `/uploads/branding/${chosen}`
+        merged.firm_logo_path = path.join(UPLOADS_BRANDING_DIR, chosen)
+      }
+    }
+  } catch (e) {}
+
+  return merged
+}
+
 /**
  * Read cached branding from JSON file.
  */
@@ -42,12 +77,12 @@ export function getLocalBranding() {
   try {
     if (fs.existsSync(BRANDING_JSON_PATH)) {
       const data = fs.readFileSync(BRANDING_JSON_PATH, 'utf-8')
-      return { ...DEFAULT_BRANDING, ...JSON.parse(data) }
+      return resolveBrandingLogo({ ...DEFAULT_BRANDING, ...JSON.parse(data) })
     }
   } catch (err) {
     console.warn('[Branding] Failed to read branding.json:', err.message)
   }
-  return { ...DEFAULT_BRANDING }
+  return resolveBrandingLogo({ ...DEFAULT_BRANDING })
 }
 
 /**
@@ -61,11 +96,15 @@ export function saveLocalBranding(data) {
     }
     const current = getLocalBranding()
     const merged = { ...current, ...data }
+    // Do not persist environment-specific absolute paths to branding.json
+    if (merged.firm_logo_path && !merged.firm_logo_path.startsWith('/')) {
+      delete merged.firm_logo_path
+    }
     fs.writeFileSync(BRANDING_JSON_PATH, JSON.stringify(merged, null, 2), 'utf-8')
-    return merged
+    return resolveBrandingLogo(merged)
   } catch (err) {
     console.error('[Branding] Failed to write branding.json:', err.message)
-    return { ...DEFAULT_BRANDING, ...data }
+    return resolveBrandingLogo({ ...DEFAULT_BRANDING, ...data })
   }
 }
 
@@ -86,24 +125,10 @@ export async function getCompanyBranding() {
         }
       }
       const merged = { ...local, ...dbSettings }
-
-      // Resolve logo disk path if logo exists
-      if (merged.firm_logo) {
-        if (merged.firm_logo.startsWith('/uploads/')) {
-          const relPath = merged.firm_logo.replace(/^\/uploads\//, '')
-          const diskPath = path.resolve(__dirname, '..', '..', 'uploads', relPath)
-          if (fs.existsSync(diskPath)) {
-            merged.firm_logo_path = diskPath
-          }
-        } else if (fs.existsSync(merged.firm_logo)) {
-          merged.firm_logo_path = merged.firm_logo
-        }
-      }
-
-      return merged
+      return resolveBrandingLogo(merged)
     }
   } catch (err) {
     // DB not ready or table missing; return local branding
   }
-  return local
+  return resolveBrandingLogo(local)
 }

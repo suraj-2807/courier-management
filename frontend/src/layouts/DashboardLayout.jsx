@@ -133,6 +133,27 @@ export default function DashboardLayout({ children }) {
     }
   }, [])
 
+  // Auto-logout after 60 minutes of complete user inactivity for security
+  useEffect(() => {
+    let idleTimer
+    const resetTimer = () => {
+      clearTimeout(idleTimer)
+      idleTimer = setTimeout(() => {
+        logout()
+        navigate('/login', { replace: true })
+      }, 60 * 60 * 1000)
+    }
+
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart']
+    events.forEach(e => window.addEventListener(e, resetTimer, { passive: true }))
+    resetTimer()
+
+    return () => {
+      clearTimeout(idleTimer)
+      events.forEach(e => window.removeEventListener(e, resetTimer))
+    }
+  }, [logout, navigate])
+
   const canAccessItem = (item) => {
     if (userIsSuperAdmin) return true
     if (item.superAdminOnly) return false

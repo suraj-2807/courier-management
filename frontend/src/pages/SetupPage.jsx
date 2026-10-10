@@ -34,7 +34,7 @@ import {
   createAdminAccount
 } from '../api/setup.api'
 import { useBrandingStore } from '../store/brandingStore'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore, isTokenExpired } from '../store/authStore'
 
 const COLOR_PRESETS = [
   { name: 'Corporate Royal Blue', primary: '#2563EB', accent: '#0F172A', lime: '#60A5FA' },
@@ -121,6 +121,15 @@ export default function SetupPage() {
           setDbConfig((prev) => ({ ...prev, database: res.currentDatabase }))
         }
         if (res.isInstalled) {
+          const auth = useAuthStore.getState()
+          if (!auth.isAuthenticated || !auth.token || isTokenExpired(auth.token)) {
+            navigate('/login', { replace: true })
+            return
+          }
+          if (!auth.isSuperAdmin()) {
+            navigate('/', { replace: true })
+            return
+          }
           if (!window.location.search.includes('reset=true')) {
             navigate('/settings', { replace: true })
             return

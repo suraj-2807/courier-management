@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore, isTokenExpired } from '../store/authStore'
 
 /**
  * Route guard that enforces module permissions.
@@ -7,9 +7,12 @@ import { useAuthStore } from '../store/authStore'
  * Normal Admin has access to all modules unless explicitly restricted by Super Admin.
  */
 export default function PermissionRoute({ module, children }) {
-  const { isAuthenticated, isSuperAdmin, hasPermission } = useAuthStore()
+  const { isAuthenticated, token, logout, isSuperAdmin, hasPermission } = useAuthStore()
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !token || isTokenExpired(token)) {
+    if (token && isTokenExpired(token)) {
+      logout()
+    }
     return <Navigate to="/login" replace />
   }
 

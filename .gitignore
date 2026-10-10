@@ -6,4 +6,6 @@ frontend/dist
 build
 .next
 backend/scratch
-backend/uploads
+backend/uploads/*
+!backend/uploads/branding/
+!backend/uploads/branding/*

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore, isTokenExpired } from '../store/authStore'
 import { useBrandingStore } from '../store/brandingStore'
 import { authApi } from '../api/auth.api'
 import { encryptWithPublicKey } from '../utils/crypto'
@@ -9,8 +9,15 @@ import toast from 'react-hot-toast'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { setAuth } = useAuthStore()
+  const { setAuth, isAuthenticated, token } = useAuthStore()
   const { branding } = useBrandingStore()
+
+  useEffect(() => {
+    if (isAuthenticated && token && !isTokenExpired(token)) {
+      navigate('/', { replace: true })
+    }
+  }, [isAuthenticated, token, navigate])
+
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [form, setForm] = useState({ email: '', password: '' })

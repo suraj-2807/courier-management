@@ -24,6 +24,7 @@ import PermissionsPage from '../pages/PermissionsPage'
 import SettingsPage from '../pages/SettingsPage'
 
 import { useBrandingStore } from '../store/brandingStore'
+import { useAuthStore, isTokenExpired } from '../store/authStore'
 import { getSetupStatus } from '../api/setup.api'
 
 export default function AppRoutes() {
@@ -43,8 +44,15 @@ export default function AppRoutes() {
             navigate('/setup')
           }
         } else if (res && res.isInstalled === true) {
-          if (location.pathname === '/setup' && !location.search.includes('reset=true')) {
-            navigate('/settings', { replace: true })
+          if (location.pathname === '/setup') {
+            const auth = useAuthStore.getState()
+            if (!auth.isAuthenticated || !auth.token || isTokenExpired(auth.token)) {
+              navigate('/login', { replace: true })
+            } else if (!auth.isSuperAdmin()) {
+              navigate('/', { replace: true })
+            } else if (!location.search.includes('reset=true')) {
+              navigate('/settings', { replace: true })
+            }
           }
         }
       } catch (err) {
