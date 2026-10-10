@@ -823,7 +823,7 @@ export default function ApiSettingsPage() {
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px',
                 padding: '10px 20px',
-                background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+                background: 'var(--color-primary)',
                 border: 'none', borderRadius: '12px',
                 fontSize: '13px', fontWeight: 700, color: '#fff',
                 cursor: 'pointer', transition: 'all 0.2s',
@@ -857,7 +857,7 @@ export default function ApiSettingsPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{
                 width: '32px', height: '32px', borderRadius: '10px',
-                background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+                background: 'var(--color-primary)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
                 <Shield style={{ width: '16px', height: '16px', color: '#fff' }} />
@@ -1203,7 +1203,7 @@ export default function ApiSettingsPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{
                   width: '36px', height: '36px', borderRadius: '10px',
-                  background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+                  background: 'var(--color-primary)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
                   {editingId ? <Pencil style={{ width: '16px', height: '16px', color: '#fff' }} /> : <Plus style={{ width: '18px', height: '18px', color: '#fff' }} />}
@@ -2160,7 +2160,7 @@ export default function ApiSettingsPage() {
                   disabled={createMutation.isPending || updateMutation.isPending}
                   style={{
                     padding: '10px 24px', borderRadius: '10px', border: 'none',
-                    background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+                    background: 'var(--color-primary)',
                     fontSize: '13px', fontWeight: 700, color: '#fff',
                     cursor: 'pointer', transition: 'all 0.2s',
                     display: 'flex', alignItems: 'center', gap: '6px',

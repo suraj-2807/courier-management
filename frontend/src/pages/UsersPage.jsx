@@ -394,14 +394,14 @@ export default function UsersPage() {
               }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-bold transition-all cursor-pointer ${
                 activeTab === 'portal_users'
-                  ? 'bg-purple-600 text-white shadow-xs'
+                  ? 'bg-primary text-white shadow-xs'
                   : 'text-text-secondary hover:text-text-primary hover:bg-surface'
               }`}
             >
-              <ShieldCheck className="w-4 h-4 text-purple-300" />
+              <ShieldCheck className="w-4 h-4 text-white/80" />
               Admin & Staff Users
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
-                activeTab === 'portal_users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                activeTab === 'portal_users' ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'
               }`}>
                 Master Control
               </span>
@@ -591,8 +591,8 @@ export default function UsersPage() {
             className="relative bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-2xl overflow-hidden max-h-[92vh] flex flex-col my-auto z-10 transition-all"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Top subtle gradient highlight bar */}
-            <div className={`h-1.5 w-full ${activeTab === 'senders' ? 'bg-gradient-to-r from-blue-600 to-indigo-600' : 'bg-gradient-to-r from-emerald-600 to-teal-600'}`} />
+            {/* Top subtle highlight bar */}
+            <div className="h-1.5 w-full bg-primary" />
 
             {/* Modal Header */}
             <div className="px-6 py-4.5 border-b border-border flex items-center justify-between bg-surface-alt/40 flex-shrink-0">

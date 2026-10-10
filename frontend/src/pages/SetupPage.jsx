@@ -37,7 +37,7 @@ import { useBrandingStore } from '../store/brandingStore'
 import { useAuthStore } from '../store/authStore'
 
 const COLOR_PRESETS = [
-  { name: 'Ventorie Lime & Charcoal', primary: '#10B981', accent: '#0F1014', lime: '#CEF23E' },
+  { name: 'Corporate Royal Blue', primary: '#2563EB', accent: '#0F172A', lime: '#60A5FA' },
   { name: 'Rixom Emerald Mint', primary: '#059669', accent: '#111827', lime: '#34D399' },
   { name: 'Electric Indigo', primary: '#4F46E5', accent: '#1E293B', lime: '#818CF8' },
   { name: 'Oceanic Teal', primary: '#0D9488', accent: '#0F172A', lime: '#2DD4BF' },
@@ -70,7 +70,7 @@ export default function SetupPage() {
   const [firmForm, setFirmForm] = useState({
     firm_name: 'SK Courier Express',
     firm_tagline: 'Fast, Secure & Worldwide Logistics Control Center',
-    color_primary: '#10B981',
+    color_primary: '#2563EB',
     color_accent: '#0F1014',
     color_sidebar: 'navy',
     firm_phone: '+91 98765 43210',
@@ -313,7 +313,7 @@ export default function SetupPage() {
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xs transition-all text-white font-bold"
-              style={{ backgroundColor: firmForm.color_primary || '#10B981' }}
+              style={{ backgroundColor: firmForm.color_primary || '#2563EB' }}
             >
               {logoPreview ? (
                 <img src={logoPreview} alt="Logo" className="w-6 h-6 object-contain" />
@@ -521,7 +521,7 @@ export default function SetupPage() {
                 type="button"
                 onClick={handleInitDb}
                 disabled={initializingDb}
-                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {initializingDb ? (
                   <>
@@ -803,7 +803,7 @@ export default function SetupPage() {
                   type="button"
                   onClick={handleSaveBranding}
                   disabled={savingBranding}
-                  className="px-6 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {savingBranding ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1013,7 +1013,7 @@ export default function SetupPage() {
                 <button
                   type="submit"
                   disabled={creatingAdmin}
-                  className="px-6 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {creatingAdmin ? (
                     <>
@@ -1037,7 +1037,7 @@ export default function SetupPage() {
           <div className="bg-white border border-[#E5E8ED] rounded-2xl p-8 sm:p-10 shadow-xs max-w-lg mx-auto text-center">
             <div
               className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-5 shadow-sm text-white"
-              style={{ backgroundColor: firmForm.color_primary || '#10B981' }}
+              style={{ backgroundColor: firmForm.color_primary || '#2563EB' }}
             >
               <CheckCircle2 className="w-8 h-8 text-white" />
             </div>
@@ -1086,7 +1086,7 @@ export default function SetupPage() {
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
               >
                 Enter Admin Dashboard
                 <ArrowRight className="w-3.5 h-3.5" />

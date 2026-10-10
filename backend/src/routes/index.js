@@ -18,6 +18,7 @@ import vendorRateImportRoutes from '../modules/vendorRateImport/vendorRateImport
 import setupRoutes from '../modules/setup/setup.routes.js'
 import usersRoutes from '../modules/users/users.routes.js'
 import manualEntriesRoutes, { publicManualVendorRouter } from '../modules/manualEntries/manualEntries.routes.js'
+import supportRoutes from '../modules/support/support.routes.js'
 
 const router = express.Router()
 
@@ -48,6 +49,7 @@ router.use('/country-codes', countryCodeRoutes)
 router.use('/products', productRoutes)
 router.use('/customers', customersRoutes)
 router.use('/vendor-rate-imports', vendorRateImportRoutes)
+router.use('/support', supportRoutes)
 
 // Public Customer endpoints (for WP Portal iframe & Customer Portal)
 import { createBooking, getBoxLabelsPdf, getWaybillPdf, getInvoicePdf } from '../modules/bookings/booking.controller.js'

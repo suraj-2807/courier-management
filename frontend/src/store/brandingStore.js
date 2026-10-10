@@ -103,7 +103,7 @@ function applyBrandingToDOM(branding) {
       img.onerror = () => {
         if (ctx) {
           drawBackground()
-          ctx.fillStyle = branding.color_primary || '#10B981'
+          ctx.fillStyle = branding.color_primary || '#2563EB'
           ctx.font = 'bold 28px sans-serif'
           ctx.textAlign = 'center'
           ctx.textBaseline = 'middle'
@@ -116,7 +116,7 @@ function applyBrandingToDOM(branding) {
     } else if (favBg) {
       if (ctx) {
         drawBackground()
-        ctx.fillStyle = branding.color_primary || '#10B981'
+        ctx.fillStyle = branding.color_primary || '#2563EB'
         ctx.font = 'bold 28px sans-serif'
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
@@ -138,9 +138,9 @@ export const useBrandingStore = create(
         firm_tagline: 'Fast, Secure & Worldwide',
         firm_logo: '',
         favicon_bg_color: '#ffffff',
-        color_primary: '#10B981',
-        color_primary_dark: '#059669',
-        color_primary_light: '#34D399',
+        color_primary: '#2563EB',
+        color_primary_dark: '#1D4ED8',
+        color_primary_light: '#60A5FA',
         color_accent: '#0F1014',
         color_sidebar: 'navy',
         firm_phone: '+91 98765 43210',

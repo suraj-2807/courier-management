@@ -33,13 +33,13 @@ const ROLE_CONFIGS = {
   super_admin: {
     label: 'Super Admin',
     desc: 'Full master access to all modules, system configuration, and user permissions.',
-    badgeClass: 'bg-purple-50 text-purple-700 border-purple-200',
+    badgeClass: 'bg-primary/10 text-primary border-primary/20',
     icon: Crown
   },
   admin: {
     label: 'Normal Admin',
     desc: 'Can use all operational & configuration features (unrestricted by default).',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
     icon: ShieldCheck
   },
   operator: {
@@ -247,7 +247,7 @@ export default function PortalUsersSection() {
             <h2 className="text-lg font-bold text-[#111827]">
               Portal Team & Role Access
             </h2>
-            <span className="text-xs bg-[#10B981]/10 text-[#10B981] font-bold px-2 py-0.5 rounded-full">
+            <span className="text-xs bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full">
               {usersList.length} Active Accounts
             </span>
           </div>
@@ -261,7 +261,7 @@ export default function PortalUsersSection() {
             <button
               type="button"
               onClick={handleOpenCreateModal}
-              className="flex items-center gap-2 bg-[#10B981] hover:bg-[#059669] text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
+              className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
               <span>Create Normal Admin / Staff</span>
@@ -281,11 +281,11 @@ export default function PortalUsersSection() {
             </div>
             <div className="bg-white border border-[#E5E8ED] rounded-xl p-3.5 shadow-xs">
               <span className="text-[11px] font-semibold text-[#6B7280]">Normal Admins</span>
-              <div className="text-xl font-extrabold text-[#10B981] mt-0.5">{adminCount}</div>
+              <div className="text-xl font-extrabold text-primary mt-0.5">{adminCount}</div>
             </div>
             <div className="bg-white border border-[#E5E8ED] rounded-xl p-3.5 shadow-xs">
               <span className="text-[11px] font-semibold text-[#6B7280]">Super Admins</span>
-              <div className="text-xl font-extrabold text-purple-600 mt-0.5">{superAdminCount}</div>
+              <div className="text-xl font-extrabold text-primary mt-0.5">{superAdminCount}</div>
             </div>
             <div className="bg-white border border-[#E5E8ED] rounded-xl p-3.5 shadow-xs">
               <span className="text-[11px] font-semibold text-[#6B7280]">Operators</span>
@@ -304,7 +304,7 @@ export default function PortalUsersSection() {
                   placeholder="Filter by name, email, or role..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl pl-9 pr-4 py-1.5 text-xs text-[#111827] placeholder-[#9CA3AF] w-full focus:outline-none focus:border-[#10B981]"
+                  className="bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl pl-9 pr-4 py-1.5 text-xs text-[#111827] placeholder-[#9CA3AF] w-full focus:outline-none focus:border-primary"
                 />
               </div>
               <span className="text-xs text-[#9CA3AF]">
@@ -314,7 +314,7 @@ export default function PortalUsersSection() {
 
             {loadingUsers ? (
               <div className="py-16 text-center text-[#9CA3AF]">
-                <Loader2 className="w-7 h-7 mx-auto animate-spin text-[#10B981] mb-2" />
+                <Loader2 className="w-7 h-7 mx-auto animate-spin text-primary mb-2" />
                 <p className="text-xs">Loading portal users...</p>
               </div>
             ) : filteredUsers.length === 0 ? (
@@ -346,7 +346,7 @@ export default function PortalUsersSection() {
                         <tr key={u.id} className="hover:bg-[#F9FAFB]/70 transition-colors">
                           <td className="py-3.5 px-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#10B981]/20 to-[#3B82F6]/20 text-[#111827] font-bold text-xs flex items-center justify-center flex-shrink-0 border border-[#E5E8ED]">
+                              <div className="w-9 h-9 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center flex-shrink-0 border border-primary/20">
                                 {(u.name || 'U').slice(0, 2).toUpperCase()}
                               </div>
                               <div className="min-w-0">
@@ -377,10 +377,10 @@ export default function PortalUsersSection() {
                             <div className="flex items-center gap-2">
                               <span
                                 className={`w-2 h-2 rounded-full ${
-                                  isActive ? 'bg-[#10B981] ring-2 ring-[#10B981]/20' : 'bg-gray-300'
+                                  isActive ? 'bg-primary ring-2 ring-primary/20' : 'bg-gray-300'
                                 }`}
                               />
-                              <span className={`font-semibold ${isActive ? 'text-[#10B981]' : 'text-gray-400'}`}>
+                              <span className={`font-semibold ${isActive ? 'text-primary' : 'text-gray-400'}`}>
                                 {isActive ? 'Active' : 'Deactivated'}
                               </span>
                             </div>
@@ -415,7 +415,7 @@ export default function PortalUsersSection() {
                                       className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                                         isActive
                                           ? 'text-amber-600 hover:bg-amber-50'
-                                          : 'text-[#10B981] hover:bg-[#10B981]/10'
+                                          : 'text-primary hover:bg-primary/10'
                                       }`}
                                       title={isActive ? 'Deactivate User' : 'Activate User'}
                                     >
@@ -452,7 +452,7 @@ export default function PortalUsersSection() {
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-[#E5E8ED] animate-scale-in">
             <div className="px-5 py-4 border-b border-[#E5E8ED] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[#10B981]/10 text-[#10B981] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                   <UserPlus className="w-4 h-4" />
                 </div>
                 <div>
@@ -486,7 +486,7 @@ export default function PortalUsersSection() {
                     placeholder="e.g. Rachel Adams"
                     value={userForm.name}
                     onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
-                    className="w-full bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[#111827] focus:outline-none focus:border-[#10B981]"
+                    className="w-full bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[#111827] focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -503,7 +503,7 @@ export default function PortalUsersSection() {
                     placeholder="rachel@courierexpress.com"
                     value={userForm.email}
                     onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
-                    className="w-full bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[#111827] focus:outline-none focus:border-[#10B981]"
+                    className="w-full bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[#111827] focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -520,7 +520,7 @@ export default function PortalUsersSection() {
                     required={!editingUser}
                     value={userForm.password}
                     onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
-                    className="w-full bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[#111827] focus:outline-none focus:border-[#10B981]"
+                    className="w-full bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[#111827] focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -559,7 +559,7 @@ export default function PortalUsersSection() {
                             label: 'Super Admin',
                             desc: 'Master access over users, security, and setup wizard',
                             icon: Crown,
-                            color: 'text-purple-700 bg-purple-50 border-purple-200'
+                            color: 'text-primary bg-primary/10 border-primary/20'
                           }
                         ]
                       : [])
@@ -571,7 +571,7 @@ export default function PortalUsersSection() {
                         key={r.id}
                         className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                           isSelected
-                            ? 'border-[#10B981] bg-[#10B981]/5 shadow-xs'
+                            ? 'border-primary bg-primary/5 shadow-xs'
                             : 'border-[#E5E8ED] hover:bg-[#F9FAFB]'
                         }`}
                       >
@@ -581,11 +581,11 @@ export default function PortalUsersSection() {
                           value={r.id}
                           checked={isSelected}
                           onChange={() => setUserForm({ ...userForm, role: r.id })}
-                          className="mt-0.5 text-[#10B981] focus:ring-[#10B981]"
+                          className="mt-0.5 text-primary focus:ring-primary"
                         />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5 font-bold text-xs text-[#111827]">
-                            <Icon className="w-3.5 h-3.5 text-[#10B981]" />
+                            <Icon className="w-3.5 h-3.5 text-primary" />
                             <span>{r.label}</span>
                           </div>
                           <p className="text-[11px] text-[#6B7280] mt-0.5 leading-snug">{r.desc}</p>
@@ -607,7 +607,7 @@ export default function PortalUsersSection() {
                 <button
                   type="submit"
                   disabled={saveUserMutation.isPending}
-                  className="flex items-center gap-2 bg-[#10B981] hover:bg-[#059669] text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                  className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
                 >
                   {saveUserMutation.isPending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

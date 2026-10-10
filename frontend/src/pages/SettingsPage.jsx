@@ -23,15 +23,19 @@ import {
   Hash,
   Layers,
   Layout,
-  ExternalLink
+  ExternalLink,
+  Database,
+  Play,
+  RotateCw
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useBrandingStore } from '../store/brandingStore'
 import { useAuthStore } from '../store/authStore'
 import { saveCompanyBranding, resetPortal } from '../api/setup.api'
+import { getDemoDataStatus, seedDemoData, resetDemoData } from '../api/demoData.api'
 
 const COLOR_PRESETS = [
-  { name: 'Ventorie Emerald', primary: '#10B981', accent: '#0F1014' },
+  { name: 'Corporate Royal Blue', primary: '#2563EB', accent: '#0F1014' },
   { name: 'Forest Mint', primary: '#059669', accent: '#111827' },
   { name: 'Electric Indigo', primary: '#4F46E5', accent: '#1E293B' },
   { name: 'Oceanic Teal', primary: '#0D9488', accent: '#0F172A' },
@@ -58,6 +62,12 @@ export default function SettingsPage() {
   const [resetting, setResetting] = useState(false)
   const [resetConfirmText, setResetConfirmText] = useState('')
 
+  // Demo Data State
+  const [demoStatus, setDemoStatus] = useState(null)
+  const [seedingDemo, setSeedingDemo] = useState(false)
+  const [resettingDemo, setResettingDemo] = useState(false)
+  const [demoResetModalOpen, setDemoResetModalOpen] = useState(false)
+
   const fileInputRef = useRef(null)
   const [logoFile, setLogoFile] = useState(null)
   const [logoPreview, setLogoPreview] = useState(branding?.firm_logo || '')
@@ -66,7 +76,7 @@ export default function SettingsPage() {
     firm_name: branding?.firm_name || 'SK Courier',
     firm_tagline: branding?.firm_tagline || 'Enterprise Logistics Control Center',
     favicon_bg_color: branding?.favicon_bg_color || '#ffffff',
-    color_primary: branding?.color_primary || '#10B981',
+    color_primary: branding?.color_primary || '#2563EB',
     color_accent: branding?.color_accent || '#0F1014',
     color_sidebar: branding?.color_sidebar || 'navy',
     firm_phone: branding?.firm_phone || '',
@@ -79,6 +89,22 @@ export default function SettingsPage() {
     tracking_prefix: branding?.tracking_prefix || 'EXP'
   })
 
+  const loadDemoStatus = async () => {
+    if (!userIsSuperAdmin) return
+    try {
+      const res = await getDemoDataStatus()
+      if (res?.success) {
+        setDemoStatus(res)
+      }
+    } catch (e) {
+      console.warn('Failed to load demo status:', e.message)
+    }
+  }
+
+  useEffect(() => {
+    loadDemoStatus()
+  }, [userIsSuperAdmin])
+
   // Sync state when branding updates
   useEffect(() => {
     if (branding) {
@@ -86,7 +112,7 @@ export default function SettingsPage() {
         firm_name: branding.firm_name || 'SK Courier',
         firm_tagline: branding.firm_tagline || 'Enterprise Logistics Control Center',
         favicon_bg_color: branding.favicon_bg_color || '#ffffff',
-        color_primary: branding.color_primary || '#10B981',
+        color_primary: branding.color_primary || '#2563EB',
         color_accent: branding.color_accent || '#0F1014',
         color_sidebar: branding.color_sidebar || 'navy',
         firm_phone: branding.firm_phone || '',
@@ -162,6 +188,41 @@ export default function SettingsPage() {
       toast.error(err.response?.data?.message || 'Reset failed')
     } finally {
       setResetting(false)
+    }
+  }
+
+  const handleSeedDemoData = async () => {
+    setSeedingDemo(true)
+    try {
+      const res = await seedDemoData()
+      if (res?.success) {
+        toast.success(res.message || '10 demo entries loaded across all modules!')
+        await loadDemoStatus()
+      } else {
+        toast.error(res?.message || 'Failed to seed demo data')
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error generating demo entries')
+    } finally {
+      setSeedingDemo(false)
+    }
+  }
+
+  const handleResetDemoData = async () => {
+    setResettingDemo(true)
+    try {
+      const res = await resetDemoData()
+      if (res?.success) {
+        toast.success(res.message || 'All demo data removed successfully!')
+        setDemoResetModalOpen(false)
+        await loadDemoStatus()
+      } else {
+        toast.error(res?.message || 'Failed to reset demo data')
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error removing demo entries')
+    } finally {
+      setResettingDemo(false)
     }
   }
 
@@ -708,7 +769,82 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* ── Card 4: Danger Zone / Portal Reset ── */}
+        {/* ── Card 4: Super Admin Demo Data Showcase & Management ── */}
+        {userIsSuperAdmin && (
+          <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
+            <div className="p-6 border-b border-border-light bg-surface-alt/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/10 text-primary border border-primary/20 mb-1.5">
+                  <Database className="w-3.5 h-3.5" />
+                  <span>Demonstration Environment</span>
+                </div>
+                <h3 className="text-base font-extrabold text-navy flex items-center gap-2">
+                  10 Demo Showcase Entries & Clean Reset
+                </h3>
+                <p className="text-xs text-text-tertiary mt-1 max-w-xl">
+                  Quickly generate 10 realistic demo records across Users, Shipments, Live Tracking Events, and Manual No-API Vendor entries for client walkthroughs, then purge them instantly when done.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleSeedDemoData}
+                  disabled={seedingDemo || resettingDemo}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50 transition-all cursor-pointer shadow-xs"
+                >
+                  {seedingDemo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+                  <span>Add 10 Demo Entries</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDemoResetModalOpen(true)}
+                  disabled={seedingDemo || resettingDemo || !demoStatus?.hasDemoData}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 disabled:opacity-40 transition-colors cursor-pointer"
+                >
+                  {resettingDemo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                  <span>Reset / Remove Demo Data</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="p-4 rounded-xl border border-border bg-surface-alt/30">
+                <span className="text-[11px] font-bold text-text-tertiary uppercase">Demo Users</span>
+                <div className="text-xl font-extrabold text-navy mt-1">
+                  {demoStatus?.counts?.users || 0}
+                  <span className="text-xs font-normal text-text-tertiary ml-1.5">accounts</span>
+                </div>
+              </div>
+              <div className="p-4 rounded-xl border border-border bg-surface-alt/30">
+                <span className="text-[11px] font-bold text-text-tertiary uppercase">Demo Shipments</span>
+                <div className="text-xl font-extrabold text-navy mt-1">
+                  {demoStatus?.counts?.shipments || 0}
+                  <span className="text-xs font-normal text-text-tertiary ml-1.5">consignments</span>
+                </div>
+              </div>
+              <div className="p-4 rounded-xl border border-border bg-surface-alt/30">
+                <span className="text-[11px] font-bold text-text-tertiary uppercase">Manual Vendors</span>
+                <div className="text-xl font-extrabold text-navy mt-1">
+                  {demoStatus?.counts?.manualEntries || 0}
+                  <span className="text-xs font-normal text-text-tertiary ml-1.5">entries</span>
+                </div>
+              </div>
+              <div className="p-4 rounded-xl border border-border bg-surface-alt/30">
+                <span className="text-[11px] font-bold text-text-tertiary uppercase">Demo Status</span>
+                <div className="mt-1 flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${demoStatus?.hasDemoData ? 'bg-primary animate-pulse' : 'bg-slate-300'}`} />
+                  <span className="text-xs font-bold text-navy">
+                    {demoStatus?.hasDemoData ? 'Active Demo Data' : 'Clean Database'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Card 5: Danger Zone / Portal Reset ── */}
         {userIsSuperAdmin && (
           <div className="bg-red-50/50 rounded-2xl border border-red-200/80 p-6 space-y-4">
             <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -793,6 +929,50 @@ export default function SettingsPage() {
               >
                 {resetting ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
                 <span>Confirm & Reset</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Demo Data Reset Confirmation ── */}
+      {demoResetModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-surface rounded-2xl border border-border shadow-2xl max-w-md w-full p-6 space-y-4 animate-scale-in">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center flex-shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-navy">
+                  Remove All Demo Data?
+                </h3>
+                <p className="text-xs text-text-tertiary">
+                  This will safely purge only demo entries (shipments, tracking events, users, manual entries).
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-text-secondary leading-relaxed bg-surface-alt p-3.5 rounded-xl border border-border-light">
+              Your genuine live shipments, real customers, and master account will remain 100% untouched. Only records flagged with <code>DEMO-</code> or <code>@demo.courier.internal</code> will be removed.
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setDemoResetModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-text-secondary hover:bg-surface-hover border border-border transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleResetDemoData}
+                disabled={resettingDemo}
+                className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-50 transition-all cursor-pointer shadow-xs"
+              >
+                {resettingDemo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                <span>Confirm Removal</span>
               </button>
             </div>
           </div>

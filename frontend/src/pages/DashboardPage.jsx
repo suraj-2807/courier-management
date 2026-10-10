@@ -47,7 +47,7 @@ import { useBrandingStore } from '../store/brandingStore'
 
 // Donut chart color palette
 const DONUT_COLORS = [
-  '#10B981', // Emerald
+  'var(--color-primary, #2563EB)',
   '#3B82F6', // Blue
   '#F59E0B', // Amber
   '#6366F1', // Indigo
@@ -233,7 +233,7 @@ export default function DashboardPage() {
               placeholder="Search item, order, etc"
               value={tableSearch}
               onChange={(e) => setTableSearch(e.target.value)}
-              className="bg-white border border-[#E5E8ED] rounded-full pl-9 pr-4 py-2 text-xs text-[#111827] placeholder-[#9CA3AF] w-56 md:w-64 focus:outline-none focus:border-[#10B981] focus:ring-2 focus:ring-[#10B981]/15 transition-all shadow-xs"
+              className="bg-white border border-[#E5E8ED] rounded-full pl-9 pr-4 py-2 text-xs text-[#111827] placeholder-[#9CA3AF] w-56 md:w-64 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all shadow-xs"
             />
           </div>
 
@@ -247,7 +247,7 @@ export default function DashboardPage() {
 
           <Link
             to="/bookings/new"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-[#10B981] hover:bg-[#059669] text-white shadow-sm transition-all"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-primary hover:bg-primary-dark text-white shadow-sm transition-all"
           >
             <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
             New Shipment
@@ -440,8 +440,8 @@ export default function DashboardPage() {
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 15, bottom: 0 }}>
                   <defs>
                     <linearGradient id="ventorieGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#CEF23E" stopOpacity={0.45} />
-                      <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
+                      <stop offset="5%" stopColor="var(--color-primary, #2563EB)" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="var(--color-primary, #2563EB)" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F4F5F8" vertical={false} />
@@ -470,7 +470,7 @@ export default function DashboardPage() {
                         return (
                           <div className="bg-[#0F1014] text-white px-3 py-1.5 rounded-lg shadow-lg text-center">
                             <div className="text-[10px] text-[#9CA3AF]">{payload[0].payload.month}</div>
-                            <div className="text-xs font-bold text-[#CEF23E]">{formatCurrency(payload[0].value)}</div>
+                            <div className="text-xs font-bold text-white">{formatCurrency(payload[0].value)}</div>
                             {payload[0].payload.shipments !== undefined && (
                               <div className="text-[10px] text-[#9CA3AF] mt-0.5">{payload[0].payload.shipments} shipments</div>
                             )}
@@ -483,7 +483,7 @@ export default function DashboardPage() {
                   <Area
                     type="monotone"
                     dataKey="amount"
-                    stroke="#10B981"
+                    stroke="var(--color-primary, #2563EB)"
                     strokeWidth={2.5}
                     fillOpacity={1}
                     fill="url(#ventorieGradient)"
@@ -578,7 +578,7 @@ export default function DashboardPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="text-xs bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl px-2.5 py-1.5 font-semibold text-[#4B5563] focus:outline-none focus:border-[#10B981] cursor-pointer"
+                className="text-xs bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl px-2.5 py-1.5 font-semibold text-[#4B5563] focus:outline-none focus:border-primary cursor-pointer"
               >
                 <option value="ALL">All Status</option>
                 <option value="delivered">Delivered</option>
@@ -589,7 +589,7 @@ export default function DashboardPage() {
 
               <Link
                 to="/bookings"
-                className="text-xs font-bold text-[#10B981] hover:text-[#059669] flex items-center gap-1 transition-colors"
+                className="text-xs font-bold text-primary hover:underline flex items-center gap-1 transition-colors"
               >
                 View All <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
@@ -627,7 +627,7 @@ export default function DashboardPage() {
                       <td className="px-5 py-3.5">
                         <Link
                           to={`/bookings/${b.id}`}
-                          className="font-bold text-xs text-[#10B981] hover:underline"
+                          className="font-bold text-xs text-primary hover:underline"
                         >
                           {b.tracking_number || b.order_id || `#AWB-${b.id}`}
                         </Link>
@@ -728,11 +728,11 @@ export default function DashboardPage() {
 
           <div className="mt-5 pt-3 border-t border-[#F4F5F8] flex items-center justify-between">
             <span className="text-[11px] text-[#9CA3AF] font-medium">
-              Network health: <span className="text-[#10B981] font-bold">Operational</span>
+              Network health: <span className="text-primary font-bold">Operational</span>
             </span>
             <Link
               to="/tracking"
-              className="text-[11px] font-bold text-[#10B981] hover:underline flex items-center gap-1"
+              className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
             >
               Track Live <ExternalLink className="w-3 h-3" />
             </Link>

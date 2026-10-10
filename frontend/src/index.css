@@ -6,12 +6,12 @@
    ══════════════════════════════════════════════════ */
 
 :root {
-  /* ── Brand Colors (Ventorie & Rixom Inspired) ── */
-  --color-primary: #10B981;
-  --color-primary-dark: #059669;
-  --color-primary-light: #34D399;
-  --color-primary-subtle: rgba(16, 185, 129, 0.08);
-  --color-primary-muted: rgba(16, 185, 129, 0.16);
+  /* ── Brand Colors (Professional Corporate Default, overridden dynamically by firm settings) ── */
+  --color-primary: #2563EB;
+  --color-primary-dark: #1D4ED8;
+  --color-primary-light: #60A5FA;
+  --color-primary-subtle: rgba(37, 99, 235, 0.08);
+  --color-primary-muted: rgba(37, 99, 235, 0.16);
 
   /* ── Accent Chartreuse / Lime (Ventorie Highlight) ── */
   --color-accent-lime: #CEF23E;
@@ -476,7 +476,7 @@ textarea.normal-case,
 .btn-primary:hover:not(:disabled) {
   background: var(--color-primary-dark);
   border-color: var(--color-primary-dark);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .btn-secondary {

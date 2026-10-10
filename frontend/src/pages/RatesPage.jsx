@@ -221,7 +221,7 @@ export default function RatesPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--color-text-primary)', fontFamily: 'var(--font-family-heading)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '36px', height: '36px', background: 'var(--color-primary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <IndianRupee style={{ width: '18px', height: '18px', color: 'white' }} />
             </div>
             Rate Management
@@ -239,7 +239,7 @@ export default function RatesPage() {
               style={{
                 display: 'flex', alignItems: 'center', gap: '6px',
                 padding: '8px 18px', fontSize: '13px', fontWeight: 700,
-                color: 'white', background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+                color: 'white', background: 'var(--color-primary)',
                 border: 'none', borderRadius: '10px', cursor: 'pointer',
                 boxShadow: '0 2px 8px var(--color-primary-subtle)',
                 transition: 'all 0.2s'
@@ -278,7 +278,7 @@ export default function RatesPage() {
             cursor: 'pointer',
             transition: 'all 0.2s',
             background: systemMode === 'pacific'
-              ? 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))'
+              ? 'var(--color-primary)'
               : 'transparent',
             color: systemMode === 'pacific' ? 'white' : 'var(--color-text-secondary)',
             boxShadow: systemMode === 'pacific' ? '0 2px 8px var(--color-primary-subtle)' : 'none'
@@ -302,7 +302,7 @@ export default function RatesPage() {
             cursor: 'pointer',
             transition: 'all 0.2s',
             background: systemMode === 'standard'
-              ? 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))'
+              ? 'var(--color-primary)'
               : 'transparent',
             color: systemMode === 'standard' ? 'white' : 'var(--color-text-secondary)',
             boxShadow: systemMode === 'standard' ? '0 2px 8px var(--color-primary-subtle)' : 'none'
@@ -351,8 +351,8 @@ export default function RatesPage() {
             <div style={{
               width: '52px', height: '52px',
               background: uploadMutation.isPending
-                ? 'linear-gradient(135deg, #F59E0B, #FBBF24)'
-                : 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+                ? 'var(--color-warning)'
+                : 'var(--color-primary)',
               borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
               marginBottom: '12px', boxShadow: '0 4px 12px var(--color-primary-subtle)'
             }}>
@@ -449,7 +449,7 @@ export default function RatesPage() {
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '6px',
               padding: '10px 24px', fontSize: '13px', fontWeight: 700,
-              color: 'white', background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+              color: 'white', background: 'var(--color-primary)',
               border: 'none', borderRadius: '10px', cursor: 'pointer',
               boxShadow: '0 2px 8px var(--color-primary-subtle)'
             }}
@@ -481,7 +481,7 @@ export default function RatesPage() {
                   whiteSpace: 'nowrap', transition: 'all 0.25s ease',
                   display: 'flex', alignItems: 'center', gap: '8px',
                   background: selectedCompanyId === company.id
-                    ? 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))'
+                    ? 'var(--color-primary)'
                     : 'transparent',
                   color: selectedCompanyId === company.id ? 'white' : 'var(--color-text-secondary)',
                   boxShadow: selectedCompanyId === company.id ? '0 2px 10px var(--color-primary-subtle)' : 'none'
@@ -588,7 +588,7 @@ export default function RatesPage() {
                       padding: '8px 18px', borderRadius: '8px', border: 'none',
                       fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                       transition: 'all 0.2s',
-                      background: activeDataTab === 'rates' ? 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))' : 'transparent',
+                      background: activeDataTab === 'rates' ? 'var(--color-primary)' : 'transparent',
                       color: activeDataTab === 'rates' ? 'white' : 'var(--color-text-secondary)',
                       boxShadow: activeDataTab === 'rates' ? '0 2px 8px var(--color-primary-subtle)' : 'none',
                       display: 'flex', alignItems: 'center', gap: '6px'
@@ -608,9 +608,9 @@ export default function RatesPage() {
                       padding: '8px 18px', borderRadius: '8px', border: 'none',
                       fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                       transition: 'all 0.2s',
-                      background: activeDataTab === 'zones' ? 'linear-gradient(135deg, #6366F1, #8B5CF6)' : 'transparent',
+                      background: activeDataTab === 'zones' ? 'var(--color-primary)' : 'transparent',
                       color: activeDataTab === 'zones' ? 'white' : 'var(--color-text-secondary)',
-                      boxShadow: activeDataTab === 'zones' ? '0 2px 8px rgba(99, 102, 241, 0.2)' : 'none',
+                      boxShadow: activeDataTab === 'zones' ? '0 2px 8px var(--color-primary-subtle)' : 'none',
                       display: 'flex', alignItems: 'center', gap: '6px'
                     }}
                   >
@@ -978,7 +978,7 @@ function getZoneColor(zone) {
     { bg: '#FEF2F2', text: '#EF4444' },   // 4 - red
     { bg: '#F5F3FF', text: '#8B5CF6' },   // 5 - violet
     { bg: '#FFF1F2', text: '#FB7185' },   // 6 - rose
-    { bg: '#ECFDF5', text: '#10B981' },   // 7 - emerald
+    { bg: '#ECFDF5', text: '#059669' },   // 7 - emerald
     { bg: '#FEF3C7', text: '#D97706' },   // 8 - yellow
     { bg: '#E0E7FF', text: '#6366F1' },   // 9 - indigo
     { bg: '#FCE7F3', text: '#EC4899' },   // 10 - pink

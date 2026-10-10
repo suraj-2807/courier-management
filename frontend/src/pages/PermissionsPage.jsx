@@ -112,7 +112,7 @@ export default function PermissionsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-[22px] font-extrabold text-navy tracking-tight flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600 border border-purple-200">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
               <ShieldCheck className="w-5 h-5" />
             </div>
             Permissions & Access Control
@@ -136,7 +136,7 @@ export default function PermissionsPage() {
           <button
             onClick={handleSavePermissions}
             disabled={savePermissionsMutation.isPending || !permissionsMatrix}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow-xs transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-primary hover:bg-primary-dark rounded-xl shadow-xs transition-all cursor-pointer"
           >
             {savePermissionsMutation.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -276,7 +276,7 @@ export default function PermissionsPage() {
         <div className="p-5 sm:p-6 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h2 className="text-[15px] font-extrabold text-navy flex items-center gap-2">
-              <Crown className="w-4 h-4 text-purple-600" />
+              <Crown className="w-4 h-4 text-primary" />
               Role & Module Access Matrix
             </h2>
             <p className="text-[12px] text-text-tertiary mt-0.5">
@@ -291,7 +291,7 @@ export default function PermissionsPage() {
 
         {loadingPerms ? (
           <div className="py-20 text-center">
-            <Loader2 className="w-7 h-7 text-purple-600 animate-spin mx-auto mb-3" />
+            <Loader2 className="w-7 h-7 text-primary animate-spin mx-auto mb-3" />
             <p className="text-[13px] text-text-tertiary font-medium">Loading permissions matrix...</p>
           </div>
         ) : (
@@ -301,11 +301,11 @@ export default function PermissionsPage() {
                 <tr className="bg-surface-alt/70 border-b border-border text-[11px] font-extrabold text-text-tertiary uppercase tracking-wider">
                   <th className="py-3.5 px-5 w-1/3">Portal Module & Capability</th>
                   <th className="py-3.5 px-4 text-center">
-                    <div className="font-bold text-purple-700 flex items-center justify-center gap-1">
+                    <div className="font-bold text-primary flex items-center justify-center gap-1">
                       <Crown className="w-3.5 h-3.5" />
                       <span>Super Admin</span>
                     </div>
-                    <div className="text-[10px] text-purple-500 font-normal mt-0.5">Master Access</div>
+                    <div className="text-[10px] text-primary/70 font-normal mt-0.5">Master Access</div>
                   </th>
                   <th className="py-3.5 px-4 text-center">
                     <div className="font-bold text-emerald-700 flex items-center justify-center gap-1">
@@ -345,7 +345,7 @@ export default function PermissionsPage() {
 
                       {/* Super Admin: Always Granted */}
                       <td className="py-4 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full">
                           <Check className="w-3.5 h-3.5" /> Always Granted
                         </span>
                       </td>
@@ -441,7 +441,7 @@ export default function PermissionsPage() {
             type="button"
             onClick={handleSavePermissions}
             disabled={savePermissionsMutation.isPending || !permissionsMatrix}
-            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer"
           >
             {savePermissionsMutation.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />

@@ -37,6 +37,7 @@ import {
 import { useAuthStore } from '../store/authStore'
 import { useBrandingStore } from '../store/brandingStore'
 import api from '../api/axios'
+import HelpSupportModal from '../components/help/HelpSupportModal'
 
 /* ── Navigation Configuration ─────────────────── */
 const navGroups = [
@@ -110,6 +111,7 @@ export default function DashboardLayout({ children }) {
   })
   const [profileOpen, setProfileOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const [pendingRequests, setPendingRequests] = useState([])
   const [pendingCount, setPendingCount] = useState(0)
   const [globalSearch, setGlobalSearch] = useState('')
@@ -270,7 +272,7 @@ export default function DashboardLayout({ children }) {
           >
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm transition-transform group-hover:scale-105"
-              style={{ backgroundColor: branding?.color_primary || 'var(--color-primary, #10B981)' }}
+              style={{ backgroundColor: branding?.color_primary || 'var(--color-primary, #2563EB)' }}
             >
               {!logoError && branding?.firm_logo ? (
                 <img
@@ -639,7 +641,11 @@ export default function DashboardLayout({ children }) {
             )}
 
             {/* Help */}
-            <button className="p-2 rounded-lg hover:bg-surface-hover transition-colors cursor-pointer hidden sm:block text-text-tertiary hover:text-text-secondary">
+            <button
+              onClick={() => setHelpOpen(true)}
+              className="p-2 rounded-lg hover:bg-surface-hover transition-colors cursor-pointer hidden sm:block text-text-tertiary hover:text-text-secondary"
+              title="Help & Technical Support (Eryx Codes)"
+            >
               <HelpCircle className="w-[18px] h-[18px]" />
             </button>
 
@@ -682,6 +688,16 @@ export default function DashboardLayout({ children }) {
                       </p>
                     </div>
                     <button
+                      onClick={() => {
+                        setProfileOpen(false)
+                        setHelpOpen(true)
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-text-primary hover:bg-surface-hover transition-colors cursor-pointer border-b border-border-light"
+                    >
+                      <HelpCircle className="w-[14px] h-[14px] text-primary" />
+                      Help & Eryx Support
+                    </button>
+                    <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-danger hover:bg-danger-bg transition-colors cursor-pointer"
                     >
@@ -702,6 +718,9 @@ export default function DashboardLayout({ children }) {
           </div>
         </main>
       </div>
+
+      {/* ── Help & Support Modal (Eryx Codes Desk) ── */}
+      <HelpSupportModal isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   )
 }

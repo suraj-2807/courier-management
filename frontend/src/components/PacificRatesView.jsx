@@ -225,7 +225,7 @@ export default function PacificRatesView() {
           left: 0,
           right: 0,
           height: '3px',
-          background: 'linear-gradient(90deg, var(--color-primary), var(--color-primary-light), #10B981)'
+          background: 'var(--color-primary)'
         }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -312,7 +312,7 @@ export default function PacificRatesView() {
               fontSize: '13px',
               fontWeight: 700,
               color: 'white',
-              background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+              background: 'var(--color-primary)',
               border: 'none',
               borderRadius: '10px',
               cursor: 'pointer',
@@ -643,7 +643,7 @@ export default function PacificRatesView() {
                 width: '36px',
                 height: '36px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+                background: 'var(--color-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -752,7 +752,7 @@ export default function PacificRatesView() {
                   fontSize: '14px',
                   fontWeight: 700,
                   color: 'white',
-                  background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+                  background: 'var(--color-primary)',
                   border: 'none',
                   borderRadius: '10px',
                   cursor: calcLoading ? 'not-allowed' : 'pointer',

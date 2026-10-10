@@ -501,10 +501,10 @@ export default function BookingDetailPage() {
           {/* 2. Vendor Invoice (File icon) */}
           <button
             onClick={handleOpenVendorInvoice}
-            className="inline-flex items-center gap-1.5 px-3 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-900 text-[12px] font-bold rounded-xl transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary/10 hover:bg-primary/15 border border-primary/20 text-primary text-[12px] font-bold rounded-xl transition-colors cursor-pointer"
             title="Open Vendor Invoice (Commercial / Freeform Invoice)"
           >
-            <FileText className="w-3.5 h-3.5 text-purple-700" />
+            <FileText className="w-3.5 h-3.5 text-primary" />
             Vendor Invoice
           </button>
 
@@ -1122,7 +1122,7 @@ function VendorResponseCard({ booking, vendorConfig, liveTracking }) {
             {liveTracking?.shipmentInfo?.secondaryCarrier ? `${liveTracking.shipmentInfo.secondaryCarrier} AWB` : 'Vendor AWB2'}
           </p>
           {liveTracking?.shipmentInfo?.vendorAwbNo || booking.vendor_awb_number_2 ? (
-            <span className="text-[12px] font-mono font-bold text-purple-800 bg-purple-50 px-2 py-0.5 rounded-md inline-block">
+            <span className="text-[12px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md inline-block">
               {liveTracking?.shipmentInfo?.vendorAwbNo || booking.vendor_awb_number_2}
             </span>
           ) : (

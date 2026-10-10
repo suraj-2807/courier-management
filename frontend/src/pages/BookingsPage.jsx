@@ -1211,7 +1211,7 @@ export default function BookingsPage() {
                               <button
                                 type="button"
                                 onClick={() => handleOpenVendorInvoiceRow(b)}
-                                className="p-1.5 text-purple-600 hover:text-purple-800 hover:bg-purple-50 rounded-lg transition-colors cursor-pointer"
+                                className="p-1.5 text-primary hover:bg-primary/10 rounded-lg transition-colors cursor-pointer"
                                 title="Vendor Invoice (Commercial / Freeform Invoice)"
                               >
                                 <FileText className="w-4 h-4" />
