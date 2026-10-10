@@ -1,3 +1,12 @@
+// Load environment variables FIRST — before any module import creates the DB pool
+import dotenv from 'dotenv'
+import { fileURLToPath } from 'url'
+import path from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+dotenv.config({ path: path.resolve(__dirname, '.env') })
+
 // Global uncaught exception handlers to redirect all errors to stdout
 process.on('uncaughtException', (err) => {
   console.log('=== CRITICAL UNCAUGHT EXCEPTION ===')

@@ -11,7 +11,19 @@ const server = app.listen(PORT, async () => {
   console.log(`Server successfully running on port ${PORT}`)
 
   try {
-    await initializeDb()
+    // Quick connection test before running heavy migrations
+    const { getPool } = await import('./config/db.js')
+    const testPool = getPool()
+    await Promise.race([
+      testPool.query('SELECT 1'),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('DB connection timed out after 10s')), 10000))
+    ])
+    console.log('Database connection verified.')
+
+    await Promise.race([
+      initializeDb(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('DB migrations timed out after 60s')), 60000))
+    ])
     console.log('Database initialized successfully.')
     // Start background tracking & forwarding number sync cron if DB ready
     startBackgroundTrackingSyncCron()

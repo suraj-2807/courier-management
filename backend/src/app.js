@@ -32,6 +32,10 @@ app.use((req, res, next) => {
   next()
 })
 
+// Health check — responds immediately, before DB or any route processing
+app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }))
+app.get('/api/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }))
+
 app.use('/api', routes)
 
 // Serve uploads (e.g. vendor label PDFs)
