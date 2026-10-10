@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import {
   HelpCircle,
   X,
@@ -111,8 +112,8 @@ export default function HelpSupportModal({ isOpen, onClose }) {
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-fade-in">
+  return typeof document !== 'undefined' ? createPortal(
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-fade-in">
       <div
         className="bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[92vh] animate-scale-in"
         onClick={(e) => e.stopPropagation()}
@@ -302,7 +303,7 @@ export default function HelpSupportModal({ isOpen, onClose }) {
                       <option value="API Integration Assistance">API Integration Assistance</option>
                       <option value="Rate Sheet / Excel Import Help">Rate Sheet / Excel Import Help</option>
                       <option value="Feature Request">Feature Request</option>
-                      <option value="Urgent Server / Hostinger Support">Urgent Server / Hostinger Support</option>
+                      <option value="Urgent Server Support">Urgent Server Support</option>
                       <option value="Other Technical Inquiry">Other Technical Inquiry</option>
                     </select>
                   </div>
@@ -456,8 +457,9 @@ export default function HelpSupportModal({ isOpen, onClose }) {
           )}
         </div>
       </div>
-    </div>
-  )
+    </div>,
+    document.body
+  ) : null
 }
 
 function Package(props) {

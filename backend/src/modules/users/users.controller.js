@@ -318,12 +318,15 @@ export async function updateRolePermissions(req, res) {
       viewer: { ...current.viewer, ...(permissions.viewer || {}) }
     }
 
-    await execute(
-      `INSERT INTO system_settings (setting_key, setting_value, description)
-       VALUES ('role_permissions', ?, 'Configured Role Based Access Control Matrix')
-       ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)`,
-      [JSON.stringify(merged)]
-    )
+    const existing = await query("SELECT setting_key FROM system_settings WHERE setting_key = 'role_permissions' LIMIT 1")
+    if (existing && existing.length > 0) {
+      await execute("UPDATE system_settings SET setting_value = ? WHERE setting_key = 'role_permissions'", [JSON.stringify(merged)])
+    } else {
+      await execute(
+        "INSERT INTO system_settings (setting_key, setting_value, description) VALUES ('role_permissions', ?, 'Configured Role Based Access Control Matrix')",
+        [JSON.stringify(merged)]
+      )
+    }
 
     return res.json({
       success: true,

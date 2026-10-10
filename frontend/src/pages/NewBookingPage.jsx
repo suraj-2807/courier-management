@@ -1671,12 +1671,12 @@ export default function NewBookingPage() {
             </div>
             <div>
               <h4 className="text-sm font-bold text-navy">
-                {allowPostPushEdit ? 'Shipment is Locked (API Pushed) — Post-Push Billing Edit Mode' : 'Shipment is Locked (API Pushed)'}
+                {allowPostPushEdit ? 'Shipment Locked — Billing Edit Mode' : 'Shipment Locked'}
               </h4>
               <p className="text-xs text-text-secondary mt-0.5">
                 {allowPostPushEdit
-                  ? 'Shipper, Consignee, and Package details are locked to protect carrier records. You can modify Final Chargeable Wt, Rate/Kg, Shipping Charge, Extra Charge, and Final Shipping below. Click "Save Billing Changes" to save and sync with remote AWBENTRY.'
-                  : 'All inputs are disabled to protect dispatched carrier data. Admin can inspect all shipper, consignee, package, charges, and invoice details.'}
+                  ? 'Shipper, Consignee, and Package details are locked. You can still modify Chargeable Weight, Rate/Kg, Shipping Charge, Extra Charge, and Final Shipping below.'
+                  : 'All fields are locked to protect dispatched shipment data. You can review all details below.'}
               </p>
             </div>
           </div>

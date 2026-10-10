@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import {
   ClipboardList,
@@ -412,7 +413,7 @@ export default function BookingRequestsPage() {
       {/*  DETAIL SLIDE-OVER PANEL               */}
       {/* ═══════════════════════════════════════ */}
 
-      {selectedRequest && (
+      {selectedRequest && createPortal(
         <>
           <div
             className="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-50"
@@ -665,11 +666,12 @@ export default function BookingRequestsPage() {
               </div>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
 
       {/* Reject Modal */}
-      {showRejectModal && (
+      {showRejectModal && createPortal(
         <>
           <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-[60]" onClick={() => setShowRejectModal(null)} />
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface border border-border rounded-2xl p-6 w-[420px] max-w-[90vw] z-[60] shadow-2xl">
@@ -697,7 +699,8 @@ export default function BookingRequestsPage() {
               </button>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
 
       {/* Slide-in animation */}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { portalUsersApi } from '../../api/portalUsers.api'
 import { useAuthStore } from '../../store/authStore'
@@ -32,25 +33,25 @@ import toast from 'react-hot-toast'
 const ROLE_CONFIGS = {
   super_admin: {
     label: 'Super Admin',
-    desc: 'Full master access to all modules, system configuration, and user permissions.',
+    desc: 'Master administrator with full system and user configuration access.',
     badgeClass: 'bg-primary/10 text-primary border-primary/20',
     icon: Crown
   },
   admin: {
-    label: 'Normal Admin',
-    desc: 'Can use all operational & configuration features (unrestricted by default).',
+    label: 'Admin',
+    desc: 'Full operational management and configuration access.',
     badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
     icon: ShieldCheck
   },
   operator: {
-    label: 'Operator / Staff',
-    desc: 'Day-to-day operations: Shipments, Booking Requests, and Tracking.',
+    label: 'Operator',
+    desc: 'Day-to-day operations: Shipments, Bookings, and Live Tracking.',
     badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
     icon: Package
   },
   viewer: {
     label: 'Viewer',
-    desc: 'Read-only access to operational lists.',
+    desc: 'Read-only access across shipments and operations.',
     badgeClass: 'bg-slate-50 text-slate-700 border-slate-200',
     icon: Eye
   }
@@ -252,7 +253,7 @@ export default function PortalUsersSection() {
             </span>
           </div>
           <p className="text-xs text-[#6B7280] mt-1">
-            Super Admin controls module permissions, creates Normal Admins (with full access), and manages staff roles.
+            Manage staff accounts, assign operational roles, and configure system permissions.
           </p>
         </div>
 
@@ -264,7 +265,7 @@ export default function PortalUsersSection() {
               className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
-              <span>Create Normal Admin / Staff</span>
+              <span>Add Team Member</span>
             </button>
           )}
         </div>
@@ -280,7 +281,7 @@ export default function PortalUsersSection() {
               <div className="text-xl font-extrabold text-[#111827] mt-0.5">{usersList.length}</div>
             </div>
             <div className="bg-white border border-[#E5E8ED] rounded-xl p-3.5 shadow-xs">
-              <span className="text-[11px] font-semibold text-[#6B7280]">Normal Admins</span>
+              <span className="text-[11px] font-semibold text-[#6B7280]">Admins</span>
               <div className="text-xl font-extrabold text-primary mt-0.5">{adminCount}</div>
             </div>
             <div className="bg-white border border-[#E5E8ED] rounded-xl p-3.5 shadow-xs">
@@ -321,7 +322,7 @@ export default function PortalUsersSection() {
               <div className="py-16 text-center text-[#9CA3AF]">
                 <Users className="w-8 h-8 mx-auto mb-2 opacity-30" />
                 <p className="text-xs font-semibold text-[#4B5563]">No users match criteria</p>
-                <p className="text-[11px] mt-0.5">Use "+ Create Normal Admin / Staff" above to add new members</p>
+                <p className="text-[11px] mt-0.5">Use "+ Add Team Member" above to add new members</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -446,28 +447,28 @@ export default function PortalUsersSection() {
         </div>
       </div>
 
-      {/* ── Modal: Create / Edit User ── */}
-      {isUserModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-[#E5E8ED] animate-scale-in">
-            <div className="px-5 py-4 border-b border-[#E5E8ED] flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+      {/* ── Modal: Create / Edit User (Ported to document.body outside all layout containers) ── */}
+      {isUserModalOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-surface rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-border animate-scale-in">
+            <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-surface-alt/40">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
                   <UserPlus className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-[#111827]">
-                    {editingUser ? 'Edit Portal User' : 'Create Normal Admin / Staff'}
+                  <h3 className="text-sm font-bold text-navy">
+                    {editingUser ? 'Edit User Account' : 'Add Team Member'}
                   </h3>
-                  <p className="text-[11px] text-[#6B7280]">
-                    {editingUser ? 'Update user details or assign new role' : 'Add account with specified access tier'}
+                  <p className="text-[11px] text-text-tertiary">
+                    {editingUser ? 'Update account profile and system role' : 'Configure staff credentials and role permissions'}
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsUserModalOpen(false)}
-                className="text-[#9CA3AF] hover:text-[#111827] p-1 rounded-lg hover:bg-[#F4F5F8] transition-colors"
+                className="text-text-tertiary hover:text-navy p-1.5 rounded-lg hover:bg-surface-hover transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -475,91 +476,87 @@ export default function PortalUsersSection() {
 
             <form onSubmit={handleUserFormSubmit} className="p-5 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#374151] mb-1">
+                <label className="block text-xs font-bold text-navy mb-1.5">
                   Full Name *
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <User className="w-4 h-4 text-text-tertiary absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     required
                     placeholder="e.g. Rachel Adams"
                     value={userForm.name}
                     onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
-                    className="w-full bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[#111827] focus:outline-none focus:border-primary"
+                    className="w-full bg-surface-alt border border-border rounded-xl pl-9 pr-3.5 py-2 text-xs text-text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#374151] mb-1">
+                <label className="block text-xs font-bold text-navy mb-1.5">
                   Email Address *
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-4 h-4 text-text-tertiary absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="email"
                     required
-                    placeholder="rachel@courierexpress.com"
+                    placeholder="user@courierportal.com"
                     value={userForm.email}
                     onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
-                    className="w-full bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[#111827] focus:outline-none focus:border-primary"
+                    className="w-full bg-surface-alt border border-border rounded-xl pl-9 pr-3.5 py-2 text-xs text-text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#374151] mb-1">
+                <label className="block text-xs font-bold text-navy mb-1.5">
                   {editingUser ? 'New Password (leave empty to keep unchanged)' : 'Password *'}
                 </label>
                 <div className="relative">
-                  <Key className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Key className="w-4 h-4 text-text-tertiary absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     placeholder={editingUser ? '••••••••' : 'Minimum 6 characters'}
                     required={!editingUser}
                     value={userForm.password}
                     onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
-                    className="w-full bg-[#F9FAFB] border border-[#E5E8ED] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[#111827] focus:outline-none focus:border-primary"
+                    className="w-full bg-surface-alt border border-border rounded-xl pl-9 pr-3.5 py-2 text-xs text-text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#374151] mb-1">
-                  Assigned Role & Privilege Tier *
+                <label className="block text-xs font-bold text-navy mb-1.5">
+                  Role Assignment *
                 </label>
                 <div className="space-y-2">
                   {[
                     {
                       id: 'admin',
-                      label: 'Normal Admin',
-                      desc: 'Full operational & configuration access (can use all features)',
-                      icon: ShieldCheck,
-                      color: 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                      label: 'Admin',
+                      desc: 'Full operational access and management privileges',
+                      icon: ShieldCheck
                     },
                     {
                       id: 'operator',
-                      label: 'Operator / Staff',
-                      desc: 'Standard operations: Bookings, Tracking, and Customer Requests',
-                      icon: Package,
-                      color: 'text-amber-700 bg-amber-50 border-amber-200'
+                      label: 'Operator',
+                      desc: 'Day-to-day operations: Shipments, Booking Requests, and Tracking',
+                      icon: Package
                     },
                     {
                       id: 'viewer',
                       label: 'Viewer',
                       desc: 'Read-only view without modification authority',
-                      icon: Eye,
-                      color: 'text-slate-700 bg-slate-50 border-slate-200'
+                      icon: Eye
                     },
                     ...(userIsSuperAdmin
                       ? [
                           {
                             id: 'super_admin',
                             label: 'Super Admin',
-                            desc: 'Master access over users, security, and setup wizard',
-                            icon: Crown,
-                            color: 'text-primary bg-primary/10 border-primary/20'
+                            desc: 'Master system administrator with full access',
+                            icon: Crown
                           }
                         ]
                       : [])
@@ -572,7 +569,7 @@ export default function PortalUsersSection() {
                         className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                           isSelected
                             ? 'border-primary bg-primary/5 shadow-xs'
-                            : 'border-[#E5E8ED] hover:bg-[#F9FAFB]'
+                            : 'border-border hover:bg-surface-alt/50'
                         }`}
                       >
                         <input
@@ -584,11 +581,11 @@ export default function PortalUsersSection() {
                           className="mt-0.5 text-primary focus:ring-primary"
                         />
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5 font-bold text-xs text-[#111827]">
+                          <div className="flex items-center gap-1.5 font-bold text-xs text-navy">
                             <Icon className="w-3.5 h-3.5 text-primary" />
                             <span>{r.label}</span>
                           </div>
-                          <p className="text-[11px] text-[#6B7280] mt-0.5 leading-snug">{r.desc}</p>
+                          <p className="text-[11px] text-text-tertiary mt-0.5 leading-snug">{r.desc}</p>
                         </div>
                       </label>
                     )
@@ -596,11 +593,11 @@ export default function PortalUsersSection() {
                 </div>
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#F4F5F8]">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-border-light">
                 <button
                   type="button"
                   onClick={() => setIsUserModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#6B7280] hover:bg-[#F4F5F8] transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-text-secondary hover:bg-surface-hover transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -614,32 +611,33 @@ export default function PortalUsersSection() {
                   ) : (
                     <Check className="w-4 h-4" />
                   )}
-                  <span>{editingUser ? 'Update Account' : 'Create User'}</span>
+                  <span>{editingUser ? 'Save Changes' : 'Create User'}</span>
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* ── Modal: Delete Confirmation ── */}
-      {deleteUserId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl border border-[#E5E8ED] text-center space-y-4">
-            <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+      {/* ── Modal: Delete Confirmation (Ported to document.body) ── */}
+      {deleteUserId && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-surface rounded-2xl w-full max-w-sm p-5 shadow-2xl border border-border text-center space-y-4 animate-scale-in">
+            <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
               <AlertTriangle className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-[#111827]">Delete User Account?</h3>
-              <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">
-                Are you sure you want to delete this user? Their login session will be revoked immediately. This action cannot be undone.
+              <h3 className="text-base font-bold text-navy">Remove User Account?</h3>
+              <p className="text-xs text-text-tertiary mt-1 leading-relaxed">
+                Are you sure you want to remove this user? Their active session will be revoked immediately.
               </p>
             </div>
             <div className="flex items-center justify-center gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => setDeleteUserId(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-[#6B7280] hover:bg-[#F4F5F8] transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-text-secondary hover:bg-surface-hover transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -654,11 +652,12 @@ export default function PortalUsersSection() {
                 ) : (
                   <Trash2 className="w-4 h-4" />
                 )}
-                <span>Delete Account</span>
+                <span>Remove Account</span>
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

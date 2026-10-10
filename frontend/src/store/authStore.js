@@ -70,7 +70,7 @@ export const useAuthStore = create(
       getRoleLabel: () => {
         const role = get().user?.role
         if (role === 'super_admin') return 'Super Admin'
-        if (role === 'admin') return 'Normal Admin'
+        if (role === 'admin') return 'Admin'
         if (role === 'operator') return 'Operator'
         if (role === 'viewer') return 'Viewer'
         return 'Staff'

@@ -7,6 +7,7 @@ export const portalUsersApi = {
   toggleStatus: (id) => api.patch(`/portal-users/${id}/status`),
   delete: (id) => api.delete(`/portal-users/${id}`),
   getPermissions: () => api.get('/portal-users/permissions'),
+  savePermissions: (permissions) => api.put('/portal-users/permissions', { permissions }),
   updatePermissions: (permissions) => api.put('/portal-users/permissions', { permissions }),
   getMyPermissions: () => api.get('/portal-users/me/permissions')
 }

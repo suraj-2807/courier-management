@@ -1,5 +1,5 @@
 import express from 'express'
-import authMiddleware, { requireSuperAdmin } from '../../middlewares/auth.middleware.js'
+import authMiddleware, { requireSuperAdmin, requireAdminOrSuperAdmin } from '../../middlewares/auth.middleware.js'
 import {
   getUsers,
   createUser,
@@ -16,9 +16,9 @@ const router = express.Router()
 // User's own resolved permissions (accessible to all authenticated users)
 router.get('/me/permissions', authMiddleware, getMyPermissions)
 
-// ── Super Admin Control: Portal Users & Access Permissions ──
-router.get('/permissions', requireSuperAdmin, getRolePermissions)
-router.put('/permissions', requireSuperAdmin, updateRolePermissions)
+// ── Role Permissions (Super Admin & Admin) ──
+router.get('/permissions', requireAdminOrSuperAdmin, getRolePermissions)
+router.put('/permissions', requireAdminOrSuperAdmin, updateRolePermissions)
 
 router.get('/', requireSuperAdmin, getUsers)
 router.post('/', requireSuperAdmin, createUser)

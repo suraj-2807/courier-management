@@ -228,8 +228,8 @@ export default function LoginPage() {
               </button>
 
               <div className="flex items-center justify-center gap-1.5 pt-1 text-[11px] text-text-tertiary">
-                <ShieldCheck className="w-3.5 h-3.5 text-brand-primary" />
-                <span>256-bit RSA encrypted transmission</span>
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                <span>Secure Portal Sign-In</span>
               </div>
             </form>
           </div>

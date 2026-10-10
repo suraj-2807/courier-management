@@ -132,7 +132,7 @@ export default function BookingDetailPage() {
         extra_charge: parseFloat(billingForm.extra_charge) || 0,
         total_amount: parseFloat(billingForm.total_amount) || 0
       })
-      toast.success('Billing details updated & synced to remote AWBENTRY!')
+      toast.success('Billing details updated & synced successfully!')
       setShowBillingModal(false)
       refetch()
     } catch (err) {

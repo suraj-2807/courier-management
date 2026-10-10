@@ -23,8 +23,8 @@ import toast from 'react-hot-toast'
 
 export default function PermissionsPage() {
   const queryClient = useQueryClient()
-  const { isSuperAdmin } = useAuthStore()
-  const userIsSuperAdmin = isSuperAdmin()
+  const { isSuperAdmin, isAdmin } = useAuthStore()
+  const canManagePermissions = isAdmin()
 
   // ── 1. Fetch System Settings (for the two operational toggles) ──
   const {
@@ -71,7 +71,7 @@ export default function PermissionsPage() {
   const savePermissionsMutation = useMutation({
     mutationFn: (matrix) => portalUsersApi.savePermissions(matrix),
     onSuccess: () => {
-      toast.success('Role permissions matrix saved successfully')
+      toast.success('Permissions saved successfully')
       queryClient.invalidateQueries(['portal-permissions'])
     },
     onError: (err) => {
@@ -80,8 +80,8 @@ export default function PermissionsPage() {
   })
 
   const handlePermissionToggle = (role, moduleKey) => {
-    if (!userIsSuperAdmin) {
-      toast.error('Only Super Admin can modify system permissions')
+    if (!canManagePermissions) {
+      toast.error('Administrator privileges required to modify permissions')
       return
     }
 
@@ -118,7 +118,7 @@ export default function PermissionsPage() {
             Permissions & Access Control
           </h1>
           <p className="text-[13px] text-text-tertiary mt-1">
-            Master control center for module accessibility, staff privilege tiers, and critical operational billing switches.
+            Configure access rights and module privileges across staff roles.
           </p>
         </div>
 
@@ -143,7 +143,7 @@ export default function PermissionsPage() {
             ) : (
               <Check className="w-4 h-4" />
             )}
-            Save Matrix
+            Save Permissions
           </button>
         </div>
       </div>
@@ -156,7 +156,7 @@ export default function PermissionsPage() {
             Operational & Accounting Policies
           </h2>
           <p className="text-[12px] text-text-tertiary mt-0.5">
-            Global operational overrides governing financial edits on locked shipments and customer ledger accounting.
+            Global settings that control billing policies and financial features across the system.
           </p>
         </div>
 
@@ -180,7 +180,7 @@ export default function PermissionsPage() {
                 </span>
               </div>
               <p className="text-[12px] text-text-tertiary mt-1 leading-relaxed">
-                When enabled, allows editing <strong>Final Chargeable Wt (kg)</strong>, <strong>Rate / Kg (₹)</strong>, <strong>Shipping Charge (₹)</strong>, <strong>Extra Charge (₹)</strong>, and <strong>Final Shipping (₹)</strong> on shipments even after they are pushed to the vendor API and locked. Saving changes will immediately update the local database and sync new financial totals to the remote Hostinger <code className="text-primary font-mono text-[11px] bg-primary/10 px-1 py-0.5 rounded">AWBENTRY</code> billing table.
+                When enabled, staff can edit billing fields such as <strong>Chargeable Weight</strong>, <strong>Rate / Kg</strong>, <strong>Shipping Charge</strong>, <strong>Extra Charge</strong>, and <strong>Final Shipping</strong> on shipments — even after they have been confirmed and locked. Changes are saved and synced automatically.
               </p>
             </div>
           </div>
@@ -235,7 +235,7 @@ export default function PermissionsPage() {
                 </span>
               </div>
               <p className="text-[12px] text-text-tertiary mt-1 leading-relaxed">
-                Enables basic accounting module with customer account balance tracking, debit and credit ledger entries (payment recording, receipts, and invoice charges), balance adjustment, and live accounting statement on the customer dashboard. When disabled, customers see only their standard shipment portal.
+                Enables the accounting module with customer balance tracking, payment recording, and transaction history. Customers will see their account statements on their dashboard. When disabled, customers see only their standard shipment portal.
               </p>
             </div>
           </div>
@@ -280,7 +280,7 @@ export default function PermissionsPage() {
               Role & Module Access Matrix
             </h2>
             <p className="text-[12px] text-text-tertiary mt-0.5">
-              Click any toggle to grant or restrict specific modules for Normal Admins, Operators, or Viewers.
+              Click any toggle to grant or restrict specific modules for Admins, Operators, or Viewers.
             </p>
           </div>
           <div className="text-[11px] font-semibold text-text-tertiary flex items-center gap-1.5 bg-surface-alt px-3 py-1.5 rounded-lg border border-border-light self-start">
@@ -310,9 +310,9 @@ export default function PermissionsPage() {
                   <th className="py-3.5 px-4 text-center">
                     <div className="font-bold text-emerald-700 flex items-center justify-center gap-1">
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      <span>Normal Admin</span>
+                      <span>Admin</span>
                     </div>
-                    <div className="text-[10px] text-emerald-600 font-normal mt-0.5">Unrestricted by default</div>
+                    <div className="text-[10px] text-emerald-600 font-normal mt-0.5">Full access by default</div>
                   </th>
                   <th className="py-3.5 px-4 text-center">
                     <div className="font-bold text-amber-700 flex items-center justify-center gap-1">

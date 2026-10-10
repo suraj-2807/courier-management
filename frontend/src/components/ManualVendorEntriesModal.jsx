@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import {
   X,
   Plus,
@@ -205,8 +206,8 @@ export default function ManualVendorEntriesModal({ vendor, onClose }) {
     setTimeout(() => setCopiedUrl(false), 2000)
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+  return typeof document !== 'undefined' ? createPortal(
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
       <div className="bg-surface rounded-2xl border border-border shadow-2xl max-w-5xl w-full flex flex-col max-h-[92vh] overflow-hidden animate-scale-in">
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-border flex items-center justify-between bg-surface-alt/40 flex-shrink-0">
@@ -852,8 +853,9 @@ async function trackShipment(awb) {
           </div>
         )}
       </div>
-    </div>
-  )
+    </div>,
+    document.body
+  ) : null
 }
 
 function PlayIcon(props) {

@@ -1405,7 +1405,7 @@ export default function ApiSettingsPage() {
                         background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)',
                         fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.5
                       }}>
-                        <strong style={{ color: 'var(--color-primary)' }}>Manual / No-API Vendor:</strong> External carrier API endpoint and credentials are not required. You can manage manual entries for this vendor, and our server provides a public tracking REST API at <code>/api/v1/manual-vendor/{form.vendor_code || 'vendor'}/track/:awb</code> that external websites can call.
+                        <strong style={{ color: 'var(--color-primary)' }}>Manual / No-API Vendor:</strong> External carrier API credentials are not required. You can manage shipment entries and tracking updates manually for this vendor. A public tracking endpoint is automatically available for external use.
                       </div>
                     )}
 
