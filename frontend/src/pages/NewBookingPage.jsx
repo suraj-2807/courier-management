@@ -1602,7 +1602,7 @@ export default function NewBookingPage() {
   }
 
   return (
-    <div className="animate-fade-in w-full space-y-6 pb-8">
+    <div className="animate-fade-in w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-6 max-w-[1800px] mx-auto space-y-6 pb-12">
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-surface p-5 rounded-2xl border border-border shadow-xs">
         <div className="flex items-center gap-3.5">
@@ -1806,7 +1806,7 @@ export default function NewBookingPage() {
         </div>
 
         {/* ── Main 3 Columns Layout ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* ── Column 1: Sender / Shipper Details ── */}
           <fieldset disabled={isGeneralLocked} className="contents">
@@ -1814,8 +1814,7 @@ export default function NewBookingPage() {
             <div>
               <RedBadge title="Shipper Details" icon={User} />
 
-
-              <div className="space-y-2.5">
+              <div className="space-y-4">
                 <div ref={senderContainerRef} className="relative">
                   <CompactField label="Sender Full Name" required>
                     <input
@@ -1834,7 +1833,7 @@ export default function NewBookingPage() {
                   {/* Sender Autocomplete Dropdown */}
                   {senderSuggestionsOpen && filteredSenders.length > 0 && (
                     <div className="absolute left-0 right-0 top-full mt-1 bg-surface border border-border rounded-xl shadow-2xl z-50 max-h-64 overflow-y-auto divide-y divide-border animate-fade-in">
-                      <div className="px-3 py-1.5 bg-red-50/70 text-[10px] font-extrabold text-primary uppercase tracking-wider flex items-center justify-between sticky top-0 backdrop-blur-xs">
+                      <div className="px-3 py-1.5 bg-primary/10 text-[10px] font-extrabold text-primary uppercase tracking-wider flex items-center justify-between sticky top-0 backdrop-blur-xs">
                         <span>Saved Senders (Click to Autofill)</span>
                         <span className="text-[9px] text-text-tertiary">{filteredSenders.length} found</span>
                       </div>
@@ -1911,7 +1910,7 @@ export default function NewBookingPage() {
                   />
                 </CompactField>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3.5">
                   <CompactField label="City" required>
                     <input
                       type="text"
@@ -1932,7 +1931,7 @@ export default function NewBookingPage() {
                   </CompactField>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3.5">
                   <CompactField label="State">
                     <input
                       type="text"
@@ -1953,7 +1952,7 @@ export default function NewBookingPage() {
                   </CompactField>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <CompactField label="Phone 1 (API & Bill)" required highlight={!form.sender_phone}>
                     <input
                       type="tel"
@@ -1984,7 +1983,7 @@ export default function NewBookingPage() {
                   />
                 </CompactField>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3.5">
                   <CompactField label="Doc Type">
                     <select
                       value={normalizeDocType(form.sender_gstin_type, true)}
@@ -2028,7 +2027,7 @@ export default function NewBookingPage() {
             <div>
               <RedBadge title="Consignee Details" icon={MapPin} />
 
-              <div className="space-y-2.5">
+              <div className="space-y-4">
                 <div ref={receiverContainerRef} className="relative">
                   <CompactField label="Receiver Full Name" required highlight={!form.receiver_name && !form.receiver_company}>
                     <input
@@ -2126,7 +2125,7 @@ export default function NewBookingPage() {
                   />
                 </CompactField>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3.5">
                   <CompactField label="City" required highlight={!form.receiver_city}>
                     <input
                       type="text"
@@ -2147,7 +2146,7 @@ export default function NewBookingPage() {
                   </CompactField>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3.5">
                   <CompactField label="State">
                     <input
                       type="text"
@@ -2162,13 +2161,13 @@ export default function NewBookingPage() {
                       value={form.receiver_country}
                       onChange={val => updateForm('receiver_country', val)}
                       placeholder="Search Country (e.g. USA, UK)"
-                      className="w-full bg-transparent focus:outline-none text-[13px] text-primary font-bold uppercase pr-6 placeholder-red-300"
+                      className="w-full bg-transparent focus:outline-none text-[13px] text-primary font-bold uppercase pr-6 placeholder-text-tertiary"
                       countryList={countryList}
                     />
                   </CompactField>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <CompactField label="Phone 1 (API & Bill)" required highlight={!form.receiver_phone}>
                     <input
                       type="tel"
@@ -2199,7 +2198,7 @@ export default function NewBookingPage() {
                   />
                 </CompactField>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3.5">
                   <CompactField label="Doc Type">
                     <select
                       value={normalizeDocType(form.receiver_gstin_type, false)}
@@ -2244,7 +2243,7 @@ export default function NewBookingPage() {
             <div>
               <RedBadge title="Courier & Vendor API" icon={Plug} />
 
-              <div className="space-y-2.5">
+              <div className="space-y-4">
                 <fieldset disabled={isGeneralLocked} className="contents">
                 {/* Vendor API Config Selection */}
                 <CompactField label="Courier Vendor API">
@@ -2434,7 +2433,7 @@ export default function NewBookingPage() {
 
                 {/* Payment Mode & Charges — Editable even when shipment is locked if allowPostPushEdit is enabled */}
                 <fieldset disabled={isBillingLocked} className="contents">
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <CompactField label="Payment Mode">
                     <select
                       value={form.payment_mode}
@@ -2470,7 +2469,7 @@ export default function NewBookingPage() {
                     />
                   </CompactField>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3.5">
                     <CompactField label="Rate / Kg (₹)">
                       <input
                         type="number"
@@ -2517,7 +2516,7 @@ export default function NewBookingPage() {
                   </div>
 
                   {/* Extra Charge & Final Shipping Charge — bill/invoice only, NOT sent to API */}
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3.5">
                     <CompactField label="Extra Charge (₹)">
                       <input
                         type="number"
@@ -2554,7 +2553,7 @@ export default function NewBookingPage() {
                   </CompactField>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <CompactField label="Order Ref No.">
                     <input
                       type="text"
@@ -2586,7 +2585,7 @@ export default function NewBookingPage() {
         <div className="bg-surface rounded-2xl border border-border p-5 shadow-xs">
           <RedBadge title="Package & Weight Specifications" icon={Package} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-5">
             <CompactField label="Package Type">
               <select
                 value={form.package_type}
@@ -2825,7 +2824,7 @@ export default function NewBookingPage() {
           {showShipmentInvoice && (
             <div className="mt-4 animate-slide-down">
               {/* Invoice Meta Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-5">
                 <CompactField label="Invoice Type">
                   <select
                     value={form.invoice_type || 'INVOICE'}
@@ -3233,8 +3232,8 @@ export default function NewBookingPage() {
 
 function RedBadge({ title, icon: Icon }) {
   return (
-    <div className="flex items-center gap-2.5 mb-3.5">
-      <div className="w-7 h-7 bg-navy/5 rounded-lg flex items-center justify-center text-navy flex-shrink-0">
+    <div className="flex items-center gap-2.5 mb-4">
+      <div className="w-7 h-7 bg-primary/10 rounded-lg flex items-center justify-center text-primary flex-shrink-0">
         {Icon ? <Icon className="w-4 h-4" /> : <Package className="w-4 h-4" />}
       </div>
       <h3 className="text-sm font-bold text-navy tracking-tight">
@@ -3249,12 +3248,12 @@ function CompactField({ label, required, children, className = '', highlight = f
     <div
       className={`relative border ${
         highlight
-          ? 'border-danger ring-2 ring-danger/10'
+          ? 'border-primary ring-2 ring-primary/20 shadow-xs'
           : 'border-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 focus-within:z-30'
       } rounded-xl bg-surface px-3.5 py-2.5 transition-all ${className}`}
     >
-      <label className="absolute -top-2.5 left-3 px-1 bg-surface text-[10px] font-bold text-text-secondary uppercase tracking-wider whitespace-nowrap z-10">
-        {label} {required && <span className="text-danger">*</span>}
+      <label className="absolute -top-2.5 left-3 px-1.5 bg-surface text-[10px] font-bold text-text-secondary uppercase tracking-wider whitespace-nowrap z-10">
+        {label} {required && <span className="text-primary font-bold">*</span>}
       </label>
       <div className="pt-1">{children}</div>
     </div>

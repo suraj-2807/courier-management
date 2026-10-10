@@ -950,7 +950,7 @@ export default function CustomerBookingPage() {
   }
 
   return (
-    <div className="animate-fade-in w-full space-y-6 p-4 sm:p-6 pb-8">
+    <div className="animate-fade-in w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-6 max-w-[1800px] mx-auto space-y-6 pb-12">
       <Toaster position="top-center" />
 
       {/* ── Top Header ── */}
@@ -2042,8 +2042,8 @@ export default function CustomerBookingPage() {
 
 function RedBadge({ title, icon: Icon }) {
   return (
-    <div className="flex items-center gap-2.5 mb-3.5">
-      <div className="w-7 h-7 bg-navy/5 rounded-lg flex items-center justify-center text-navy flex-shrink-0">
+    <div className="flex items-center gap-2.5 mb-4">
+      <div className="w-7 h-7 bg-primary/10 rounded-lg flex items-center justify-center text-primary flex-shrink-0">
         {Icon ? <Icon className="w-4 h-4" /> : <Package className="w-4 h-4" />}
       </div>
       <h3 className="text-sm font-bold text-navy tracking-tight">
@@ -2058,12 +2058,12 @@ function CompactField({ label, required, children, className = '', highlight = f
     <div
       className={`relative border ${
         highlight
-          ? 'border-danger ring-2 ring-danger/10'
+          ? 'border-primary ring-2 ring-primary/20 shadow-xs'
           : 'border-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 focus-within:z-30'
       } rounded-xl bg-surface px-3.5 py-2.5 transition-all ${className}`}
     >
-      <label className="absolute -top-2.5 left-3 px-1 bg-surface text-[10px] font-bold text-text-secondary uppercase tracking-wider whitespace-nowrap z-10">
-        {label} {required && <span className="text-danger">*</span>}
+      <label className="absolute -top-2.5 left-3 px-1.5 bg-surface text-[10px] font-bold text-text-secondary uppercase tracking-wider whitespace-nowrap z-10">
+        {label} {required && <span className="text-primary font-bold">*</span>}
       </label>
       <div className="pt-1">{children}</div>
     </div>
