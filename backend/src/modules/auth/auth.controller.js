@@ -110,14 +110,22 @@ export const login = async (req, res) => {
     const identifier = (email || '').trim().toLowerCase()
     const cleanPassword = (password || '').trim()
 
+    const isSuperAdminAlias = ['admin', 'superadmin', 'super_admin'].includes(identifier)
+
     const rows = await query(
-      `SELECT * FROM users 
-       WHERE LOWER(TRIM(email)) = ? 
-          OR LOWER(TRIM(name)) = ? 
-          OR (? IN ('admin', 'superadmin', 'super_admin') AND role = 'super_admin')
-       ORDER BY (role = 'super_admin') DESC 
-       LIMIT 1`,
-      [identifier, identifier, identifier]
+      isSuperAdminAlias
+        ? `SELECT * FROM users 
+           WHERE LOWER(TRIM(email)) = ? 
+              OR LOWER(TRIM(name)) = ? 
+              OR role = 'super_admin'
+           ORDER BY (role = 'super_admin') DESC 
+           LIMIT 1`
+        : `SELECT * FROM users 
+           WHERE LOWER(TRIM(email)) = ? 
+              OR LOWER(TRIM(name)) = ? 
+           ORDER BY (role = 'super_admin') DESC 
+           LIMIT 1`,
+      [identifier, identifier]
     )
 
     const user = rows[0]

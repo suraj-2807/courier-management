@@ -782,7 +782,7 @@ export default function SettingsPage() {
                   10 Demo Showcase Entries & Clean Reset
                 </h3>
                 <p className="text-xs text-text-tertiary mt-1 max-w-xl">
-                  Quickly generate 10 realistic demo records across Users, Shipments, Live Tracking Events, and Manual No-API Vendor entries for client walkthroughs, then purge them instantly when done.
+                  Quickly generate 10 realistic demo records across Users, Senders, Receivers, Shipments, Live Tracking Events, and Manual No-API Vendor entries for client walkthroughs, then purge them instantly when done.
                 </p>
               </div>
 
@@ -809,34 +809,48 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="p-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="p-4 rounded-xl border border-border bg-surface-alt/30">
-                <span className="text-[11px] font-bold text-text-tertiary uppercase">Demo Users</span>
-                <div className="text-xl font-extrabold text-navy mt-1">
+            <div className="p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+              <div className="p-3.5 rounded-xl border border-border bg-surface-alt/30">
+                <span className="text-[10px] font-bold text-text-tertiary uppercase">Demo Users</span>
+                <div className="text-lg font-extrabold text-navy mt-1">
                   {demoStatus?.counts?.users || 0}
-                  <span className="text-xs font-normal text-text-tertiary ml-1.5">accounts</span>
+                  <span className="text-[11px] font-normal text-text-tertiary ml-1">users</span>
                 </div>
               </div>
-              <div className="p-4 rounded-xl border border-border bg-surface-alt/30">
-                <span className="text-[11px] font-bold text-text-tertiary uppercase">Demo Shipments</span>
-                <div className="text-xl font-extrabold text-navy mt-1">
+              <div className="p-3.5 rounded-xl border border-border bg-surface-alt/30">
+                <span className="text-[10px] font-bold text-text-tertiary uppercase">Demo Senders</span>
+                <div className="text-lg font-extrabold text-navy mt-1">
+                  {demoStatus?.counts?.senders || 0}
+                  <span className="text-[11px] font-normal text-text-tertiary ml-1">shippers</span>
+                </div>
+              </div>
+              <div className="p-3.5 rounded-xl border border-border bg-surface-alt/30">
+                <span className="text-[10px] font-bold text-text-tertiary uppercase">Demo Receivers</span>
+                <div className="text-lg font-extrabold text-navy mt-1">
+                  {demoStatus?.counts?.receivers || 0}
+                  <span className="text-[11px] font-normal text-text-tertiary ml-1">clients</span>
+                </div>
+              </div>
+              <div className="p-3.5 rounded-xl border border-border bg-surface-alt/30">
+                <span className="text-[10px] font-bold text-text-tertiary uppercase">Demo Shipments</span>
+                <div className="text-lg font-extrabold text-navy mt-1">
                   {demoStatus?.counts?.shipments || 0}
-                  <span className="text-xs font-normal text-text-tertiary ml-1.5">consignments</span>
+                  <span className="text-[11px] font-normal text-text-tertiary ml-1">parcels</span>
                 </div>
               </div>
-              <div className="p-4 rounded-xl border border-border bg-surface-alt/30">
-                <span className="text-[11px] font-bold text-text-tertiary uppercase">Manual Vendors</span>
-                <div className="text-xl font-extrabold text-navy mt-1">
+              <div className="p-3.5 rounded-xl border border-border bg-surface-alt/30">
+                <span className="text-[10px] font-bold text-text-tertiary uppercase">Manual Vendors</span>
+                <div className="text-lg font-extrabold text-navy mt-1">
                   {demoStatus?.counts?.manualEntries || 0}
-                  <span className="text-xs font-normal text-text-tertiary ml-1.5">entries</span>
+                  <span className="text-[11px] font-normal text-text-tertiary ml-1">entries</span>
                 </div>
               </div>
-              <div className="p-4 rounded-xl border border-border bg-surface-alt/30">
-                <span className="text-[11px] font-bold text-text-tertiary uppercase">Demo Status</span>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className={`w-2.5 h-2.5 rounded-full ${demoStatus?.hasDemoData ? 'bg-primary animate-pulse' : 'bg-slate-300'}`} />
-                  <span className="text-xs font-bold text-navy">
-                    {demoStatus?.hasDemoData ? 'Active Demo Data' : 'Clean Database'}
+              <div className="p-3.5 rounded-xl border border-border bg-surface-alt/30">
+                <span className="text-[10px] font-bold text-text-tertiary uppercase">Demo Status</span>
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <span className={`w-2 h-2 rounded-full ${demoStatus?.hasDemoData ? 'bg-primary animate-pulse' : 'bg-slate-300'}`} />
+                  <span className="text-[11px] font-bold text-navy truncate">
+                    {demoStatus?.hasDemoData ? 'Active Demo' : 'Clean DB'}
                   </span>
                 </div>
               </div>
@@ -948,7 +962,7 @@ export default function SettingsPage() {
                   Remove All Demo Data?
                 </h3>
                 <p className="text-xs text-text-tertiary">
-                  This will safely purge only demo entries (shipments, tracking events, users, manual entries).
+                  This will safely purge only demo entries (users, senders, receivers, shipments, tracking events, manual entries).
                 </p>
               </div>
             </div>

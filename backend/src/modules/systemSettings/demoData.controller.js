@@ -10,13 +10,35 @@ export async function getDemoDataStatus(req, res) {
     const [userCount] = await query("SELECT COUNT(*) as count FROM users WHERE email LIKE '%@demo.courier.internal'")
     const [manualCount] = await query("SELECT COUNT(*) as count FROM manual_vendor_entries WHERE awb_number LIKE 'DEMO-%'")
 
+    let senderCount = { count: 0 }
+    let receiverCount = { count: 0 }
+    try {
+      const [sRes] = await query("SELECT COUNT(*) as count FROM senders WHERE email LIKE '%@demo.courier.internal' OR name LIKE 'Demo %'")
+      senderCount = sRes || { count: 0 }
+    } catch (e) {}
+
+    try {
+      const [rRes] = await query("SELECT COUNT(*) as count FROM receivers WHERE email LIKE '%@demo.courier.internal' OR name LIKE 'Demo %'")
+      receiverCount = rRes || { count: 0 }
+    } catch (e) {}
+
+    const hasDemoData = (
+      (shipmentCount?.count || 0) > 0 ||
+      (userCount?.count || 0) > 0 ||
+      (manualCount?.count || 0) > 0 ||
+      (senderCount?.count || 0) > 0 ||
+      (receiverCount?.count || 0) > 0
+    )
+
     return res.json({
       success: true,
-      hasDemoData: (shipmentCount?.count > 0 || userCount?.count > 0 || manualCount?.count > 0),
+      hasDemoData,
       counts: {
         shipments: shipmentCount?.count || 0,
         users: userCount?.count || 0,
-        manualEntries: manualCount?.count || 0
+        manualEntries: manualCount?.count || 0,
+        senders: senderCount?.count || 0,
+        receivers: receiverCount?.count || 0
       }
     })
   } catch (err) {
@@ -26,15 +48,66 @@ export async function getDemoDataStatus(req, res) {
 }
 
 /**
- * Seed 10 demo entries across Users, Shipments, Tracking Events, and Manual Vendor Entries
+ * Seed 10 demo entries across Users, Senders, Receivers, Shipments, Tracking Events, and Manual Vendor Entries
  */
 export async function seedDemoData(req, res) {
   try {
+    // 0. Ensure senders and receivers tables exist
+    try {
+      await execute(`CREATE TABLE IF NOT EXISTS senders (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(150) NOT NULL,
+        company VARCHAR(150) DEFAULT '',
+        phone VARCHAR(50) DEFAULT '',
+        phone_2 VARCHAR(50) DEFAULT '',
+        email VARCHAR(150) DEFAULT '',
+        address TEXT DEFAULT NULL,
+        address_2 VARCHAR(255) DEFAULT '',
+        city VARCHAR(100) DEFAULT '',
+        state VARCHAR(100) DEFAULT '',
+        pincode VARCHAR(20) DEFAULT '',
+        country VARCHAR(100) DEFAULT 'INDIA',
+        gstin_type VARCHAR(50) DEFAULT '',
+        gstin_no VARCHAR(50) DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_sender_name (name)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+      await execute(`CREATE TABLE IF NOT EXISTS receivers (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(150) NOT NULL,
+        company VARCHAR(150) DEFAULT '',
+        phone VARCHAR(50) DEFAULT '',
+        phone_2 VARCHAR(50) DEFAULT '',
+        email VARCHAR(150) DEFAULT '',
+        address TEXT DEFAULT NULL,
+        address_2 VARCHAR(255) DEFAULT '',
+        city VARCHAR(100) DEFAULT '',
+        state VARCHAR(100) DEFAULT '',
+        pincode VARCHAR(20) DEFAULT '',
+        country VARCHAR(100) DEFAULT '',
+        gstin_type VARCHAR(50) DEFAULT '',
+        gstin_no VARCHAR(50) DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_receiver_name (name)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+    } catch (tblErr) {}
+
     // 1. Purge any previous demo data first to avoid duplicate keys
     await execute("DELETE FROM tracking_events WHERE shipment_id IN (SELECT id FROM shipments WHERE tracking_number LIKE 'DEMO-%')")
     await execute("DELETE FROM shipments WHERE tracking_number LIKE 'DEMO-%'")
     await execute("DELETE FROM manual_vendor_entries WHERE awb_number LIKE 'DEMO-%'")
     await execute("DELETE FROM users WHERE email LIKE '%@demo.courier.internal'")
+    try {
+      await execute("DELETE FROM senders WHERE email LIKE '%@demo.courier.internal' OR name LIKE 'Demo %'")
+    } catch (e) {}
+    try {
+      await execute("DELETE FROM receivers WHERE email LIKE '%@demo.courier.internal' OR name LIKE 'Demo %'")
+    } catch (e) {}
+    try {
+      await execute("DELETE FROM customer_addresses WHERE customer_email LIKE '%@demo.courier.internal' OR email LIKE '%@demo.courier.internal' OR name LIKE 'Demo %'")
+    } catch (e) {}
 
     // 2. Seed 10 Demo Users
     const demoPasswordHash = await bcrypt.hash('DemoPass@2026', 10)
@@ -55,6 +128,330 @@ export async function seedDemoData(req, res) {
       await execute(
         "INSERT INTO users (name, email, password, role, is_active) VALUES (?, ?, ?, ?, 1)",
         [u.name, u.email, demoPasswordHash, u.role]
+      )
+    }
+
+    // 2b. Seed 10 Demo Senders (Addresses)
+    const demoSenders = [
+      {
+        name: 'Demo Apex Exports Ltd',
+        company: 'Apex Exports Ltd',
+        phone: '+91 98200 11223',
+        phone_2: '+91 98200 11224',
+        email: 'dispatch@apexexports.demo.courier.internal',
+        address: 'Plot 42, MIDC Industrial Area, Andheri East',
+        address_2: 'Near SEEPZ Gate No 2',
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        pincode: '400093',
+        country: 'INDIA',
+        gstin_type: 'GSTIN',
+        gstin_no: '27AABCA1234F1Z5'
+      },
+      {
+        name: 'Demo Indo-British Silk Traders',
+        company: 'Indo-British Silk Traders Pvt Ltd',
+        phone: '+91 98390 44556',
+        phone_2: '',
+        email: 'orders@indobritishsilk.demo.courier.internal',
+        address: '12 Chowk Godowlia, Silk Market Lane',
+        address_2: 'Suite 3B',
+        city: 'Varanasi',
+        state: 'Uttar Pradesh',
+        pincode: '221001',
+        country: 'INDIA',
+        gstin_type: 'GSTIN',
+        gstin_no: '09AABCU4567G1Z8'
+      },
+      {
+        name: 'Demo Himalayan Organic Teas',
+        company: 'Himalayan Organic Teas Estate',
+        phone: '+91 94340 78901',
+        phone_2: '',
+        email: 'sales@himalayantea.demo.courier.internal',
+        address: 'Tea Board Road, Glenburn Division',
+        address_2: 'Estate House No 4',
+        city: 'Darjeeling',
+        state: 'West Bengal',
+        pincode: '734101',
+        country: 'INDIA',
+        gstin_type: 'GSTIN',
+        gstin_no: '19AABCH7890H1Z2'
+      },
+      {
+        name: 'Demo Deccan Precision Tools',
+        company: 'Deccan Precision Tools LLP',
+        phone: '+91 98450 67890',
+        phone_2: '+91 98450 67899',
+        email: 'logistics@deccanprecision.demo.courier.internal',
+        address: '5th Phase, Peenya Industrial Area',
+        address_2: 'Plot 108/A, 2nd Cross',
+        city: 'Bengaluru',
+        state: 'Karnataka',
+        pincode: '560058',
+        country: 'INDIA',
+        gstin_type: 'GSTIN',
+        gstin_no: '29AABCD5432J1Z1'
+      },
+      {
+        name: 'Demo Gujarat Diamond Craft',
+        company: 'Gujarat Diamond Craft Ltd',
+        phone: '+91 98250 33445',
+        phone_2: '',
+        email: 'exports@gujaratdiamond.demo.courier.internal',
+        address: 'Surat Diamond Bourse, Tower C',
+        address_2: 'Khajod Dream City',
+        city: 'Surat',
+        state: 'Gujarat',
+        pincode: '395007',
+        country: 'INDIA',
+        gstin_type: 'GSTIN',
+        gstin_no: '24AABCG9876K1Z9'
+      },
+      {
+        name: 'Demo Malabar Spice Exporters',
+        company: 'Malabar Spice Exporters Co',
+        phone: '+91 94470 55667',
+        phone_2: '',
+        email: 'shipping@malabarspice.demo.courier.internal',
+        address: 'Willingdon Island Wharf 6',
+        address_2: 'Spice Exchange Building',
+        city: 'Kochi',
+        state: 'Kerala',
+        pincode: '682003',
+        country: 'INDIA',
+        gstin_type: 'GSTIN',
+        gstin_no: '32AABCM6543L1Z4'
+      },
+      {
+        name: 'Demo Jaipur Royal Handicrafts',
+        company: 'Jaipur Royal Handicrafts',
+        phone: '+91 98290 88990',
+        phone_2: '',
+        email: 'dispatch@jaipurcrafts.demo.courier.internal',
+        address: 'MI Road, Near Ajmeri Gate',
+        address_2: 'Heritage Arcade Floor 2',
+        city: 'Jaipur',
+        state: 'Rajasthan',
+        pincode: '302001',
+        country: 'INDIA',
+        gstin_type: 'GSTIN',
+        gstin_no: '08AABCJ1122M1Z7'
+      },
+      {
+        name: 'Demo Chennai Auto Tech Corp',
+        company: 'Chennai Auto Tech Corporation',
+        phone: '+91 98400 22334',
+        phone_2: '+91 98400 22335',
+        email: 'cargo@chennaiauto.demo.courier.internal',
+        address: 'SIPCOT Industrial Park, Phase II',
+        address_2: 'Sriperumbudur corridor',
+        city: 'Chennai',
+        state: 'Tamil Nadu',
+        pincode: '602105',
+        country: 'INDIA',
+        gstin_type: 'GSTIN',
+        gstin_no: '33AABCC3344N1Z3'
+      },
+      {
+        name: 'Demo Punjab Agro Foodworks',
+        company: 'Punjab Agro Foodworks Ltd',
+        phone: '+91 98140 66778',
+        phone_2: '',
+        email: 'supply@punjabagro.demo.courier.internal',
+        address: 'GT Road, Focal Point Phase IV',
+        address_2: 'Grain Silo Complex 8',
+        city: 'Ludhiana',
+        state: 'Punjab',
+        pincode: '141010',
+        country: 'INDIA',
+        gstin_type: 'GSTIN',
+        gstin_no: '03AABCP5566P1Z6'
+      },
+      {
+        name: 'Demo Hyderabad Biotech Labs',
+        company: 'Hyderabad Biotech Labs LLP',
+        phone: '+91 98490 99001',
+        phone_2: '+91 98490 99002',
+        email: 'pharma@hydbiotech.demo.courier.internal',
+        address: 'Genome Valley, Shamirpet',
+        address_2: 'Bio-Research Park Block B',
+        city: 'Hyderabad',
+        state: 'Telangana',
+        pincode: '500078',
+        country: 'INDIA',
+        gstin_type: 'GSTIN',
+        gstin_no: '36AABCH7788Q1Z0'
+      }
+    ]
+
+    for (const s of demoSenders) {
+      await execute(
+        `INSERT INTO senders (name, company, phone, phone_2, email, address, address_2, city, state, pincode, country, gstin_type, gstin_no)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [s.name, s.company, s.phone, s.phone_2, s.email, s.address, s.address_2, s.city, s.state, s.pincode, s.country, s.gstin_type, s.gstin_no]
+      )
+    }
+
+    // 2c. Seed 10 Demo Receivers (Addresses)
+    const demoReceivers = [
+      {
+        name: 'Demo Nexus Global Logistics LLC',
+        company: 'Nexus Global Logistics LLC',
+        phone: '+1 212 555 0192',
+        phone_2: '+1 212 555 0193',
+        email: 'ny-inbound@nexuslogistics.demo.courier.internal',
+        address: '450 Lexington Avenue, 14th Floor',
+        address_2: 'Grand Central Terminal District',
+        city: 'New York',
+        state: 'NY',
+        pincode: '10001',
+        country: 'USA',
+        gstin_type: 'Tax ID / EIN',
+        gstin_no: '13-5849201'
+      },
+      {
+        name: 'Demo Kensington Fabrics Ltd',
+        company: 'Kensington Fabrics Ltd',
+        phone: '+44 20 7946 0912',
+        phone_2: '',
+        email: 'warehouse@kensingtonfabrics.demo.courier.internal',
+        address: '77 St John Street, Clerkenwell',
+        address_2: 'Docklands Distribution Hub',
+        city: 'London',
+        state: 'Greater London',
+        pincode: 'EC1A 1BB',
+        country: 'UNITED KINGDOM',
+        gstin_type: 'VAT',
+        gstin_no: 'GB 987 6543 21'
+      },
+      {
+        name: 'Demo Al-Mirfa General Trading LLC',
+        company: 'Al-Mirfa General Trading LLC',
+        phone: '+971 4 321 4567',
+        phone_2: '+971 50 123 4567',
+        email: 'customs@almirfatrading.demo.courier.internal',
+        address: 'Warehouse 18, Al Quoz Industrial Area 3',
+        address_2: 'Sheikh Zayed Road Access',
+        city: 'Dubai',
+        state: 'Dubai',
+        pincode: '48201',
+        country: 'UNITED ARAB EMIRATES',
+        gstin_type: 'TRN',
+        gstin_no: '100234567800003'
+      },
+      {
+        name: 'Demo Bavaria Precision Engineering',
+        company: 'Bavaria Precision Engineering GmbH',
+        phone: '+49 89 2444 8901',
+        phone_2: '',
+        email: 'wareneingang@bavariaeng.demo.courier.internal',
+        address: 'Leopoldstraße 154, Tor 3',
+        address_2: 'Technopark Schwabing',
+        city: 'Munich',
+        state: 'Bavaria',
+        pincode: '80804',
+        country: 'GERMANY',
+        gstin_type: 'USt-IdNr',
+        gstin_no: 'DE 812345678'
+      },
+      {
+        name: 'Demo Toronto Maple Health Supplies',
+        company: 'Maple Health Supplies Corp',
+        phone: '+1 416 555 0147',
+        phone_2: '',
+        email: 'receiving@maplehealth.demo.courier.internal',
+        address: '220 Bay Street, Suite 800',
+        address_2: 'Financial District',
+        city: 'Toronto',
+        state: 'ON',
+        pincode: 'M5V 2T6',
+        country: 'CANADA',
+        gstin_type: 'Business Number (BN)',
+        gstin_no: '876543210 RT0001'
+      },
+      {
+        name: 'Demo Shinjuku Electronics Co Ltd',
+        company: 'Shinjuku Electronics Co Ltd',
+        phone: '+81 3 5555 7890',
+        phone_2: '',
+        email: 'import@shinjukuelec.demo.courier.internal',
+        address: '2-8-1 Nishi-Shinjuku',
+        address_2: 'Tower South 19F',
+        city: 'Tokyo',
+        state: 'Tokyo',
+        pincode: '160-0022',
+        country: 'JAPAN',
+        gstin_type: 'Corporate Number',
+        gstin_no: '1010001098765'
+      },
+      {
+        name: 'Demo Sydney Harbor Logistics PTY',
+        company: 'Sydney Harbor Logistics PTY Ltd',
+        phone: '+61 2 9876 5432',
+        phone_2: '+61 412 345 678',
+        email: 'operations@sydneyharbor.demo.courier.internal',
+        address: 'Building 4, Botany Bay Port Boulevard',
+        address_2: 'Freight Gate 2',
+        city: 'Sydney',
+        state: 'NSW',
+        pincode: '2000',
+        country: 'AUSTRALIA',
+        gstin_type: 'ABN',
+        gstin_no: '51 824 753 556'
+      },
+      {
+        name: 'Demo Marina Bay Trading Pte Ltd',
+        company: 'Marina Bay Trading Pte Ltd',
+        phone: '+65 6789 0123',
+        phone_2: '',
+        email: 'orders@marinabaytrading.demo.courier.internal',
+        address: '10 Marina Boulevard, Tower 2',
+        address_2: 'Marina Bay Financial Centre',
+        city: 'Singapore',
+        state: 'Singapore',
+        pincode: '018981',
+        country: 'SINGAPORE',
+        gstin_type: 'UEN',
+        gstin_no: '201912345M'
+      },
+      {
+        name: 'Demo Zurich Alpine Retail AG',
+        company: 'Zurich Alpine Retail AG',
+        phone: '+41 44 211 4455',
+        phone_2: '',
+        email: 'einkauf@alpineretail.demo.courier.internal',
+        address: 'Bahnhofstrasse 45',
+        address_2: 'Commercial Entrance B',
+        city: 'Zurich',
+        state: 'Zurich',
+        pincode: '8001',
+        country: 'SWITZERLAND',
+        gstin_type: 'UID',
+        gstin_no: 'CHE-109.876.543'
+      },
+      {
+        name: 'Demo Seine Lifestyle Boutique',
+        company: 'Seine Lifestyle SAS',
+        phone: '+33 1 42 68 55 00',
+        phone_2: '',
+        email: 'reception@seinelifestyle.demo.courier.internal',
+        address: '28 Rue du Faubourg Saint-Honoré',
+        address_2: 'Cour d’Honneur',
+        city: 'Paris',
+        state: 'Île-de-France',
+        pincode: '75008',
+        country: 'FRANCE',
+        gstin_type: 'SIRET',
+        gstin_no: '80123456700018'
+      }
+    ]
+
+    for (const r of demoReceivers) {
+      await execute(
+        `INSERT INTO receivers (name, company, phone, phone_2, email, address, address_2, city, state, pincode, country, gstin_type, gstin_no)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [r.name, r.company, r.phone, r.phone_2, r.email, r.address, r.address_2, r.city, r.state, r.pincode, r.country, r.gstin_type, r.gstin_no]
       )
     }
 
@@ -545,9 +942,11 @@ export async function seedDemoData(req, res) {
 
     return res.json({
       success: true,
-      message: 'Demo dataset successfully generated! 10 users, 10 shipments with live tracking events, and 10 manual vendor entries are now active.',
+      message: 'Demo dataset successfully generated! 10 users, 10 senders, 10 receivers, 10 shipments with live tracking events, and 10 manual vendor entries are now active.',
       counts: {
         users: 10,
+        senders: 10,
+        receivers: 10,
         shipments: 10,
         manualEntries: 10
       }
@@ -567,14 +966,28 @@ export async function resetDemoData(req, res) {
     const delShipments = await execute("DELETE FROM shipments WHERE tracking_number LIKE 'DEMO-%'")
     const delManual = await execute("DELETE FROM manual_vendor_entries WHERE awb_number LIKE 'DEMO-%'")
     const delUsers = await execute("DELETE FROM users WHERE email LIKE '%@demo.courier.internal'")
+    
+    let delSenders = { affectedRows: 0 }
+    let delReceivers = { affectedRows: 0 }
+    try {
+      delSenders = await execute("DELETE FROM senders WHERE email LIKE '%@demo.courier.internal' OR name LIKE 'Demo %'")
+    } catch (e) {}
+    try {
+      delReceivers = await execute("DELETE FROM receivers WHERE email LIKE '%@demo.courier.internal' OR name LIKE 'Demo %'")
+    } catch (e) {}
+    try {
+      await execute("DELETE FROM customer_addresses WHERE customer_email LIKE '%@demo.courier.internal' OR email LIKE '%@demo.courier.internal' OR name LIKE 'Demo %'")
+    } catch (e) {}
 
     return res.json({
       success: true,
-      message: 'All demo data has been successfully removed from your database.',
+      message: 'All demo data (users, senders, receivers, shipments, tracking, and manual entries) has been successfully removed from your database.',
       cleared: {
         shipments: delShipments.affectedRows || 0,
         manualEntries: delManual.affectedRows || 0,
-        users: delUsers.affectedRows || 0
+        users: delUsers.affectedRows || 0,
+        senders: delSenders.affectedRows || 0,
+        receivers: delReceivers.affectedRows || 0
       }
     })
   } catch (err) {

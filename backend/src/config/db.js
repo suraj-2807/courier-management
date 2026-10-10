@@ -941,6 +941,64 @@ export async function initializeDb() {
       }
     }
 
+    // ── Senders Table ──
+    try {
+      await execute(`CREATE TABLE IF NOT EXISTS senders (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(150) NOT NULL,
+        company VARCHAR(150) DEFAULT '',
+        phone VARCHAR(50) DEFAULT '',
+        phone_2 VARCHAR(50) DEFAULT '',
+        email VARCHAR(150) DEFAULT '',
+        address TEXT DEFAULT NULL,
+        address_2 VARCHAR(255) DEFAULT '',
+        city VARCHAR(100) DEFAULT '',
+        state VARCHAR(100) DEFAULT '',
+        pincode VARCHAR(20) DEFAULT '',
+        country VARCHAR(100) DEFAULT 'INDIA',
+        gstin_type VARCHAR(50) DEFAULT '',
+        gstin_no VARCHAR(50) DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_sender_name (name),
+        INDEX idx_sender_phone (phone)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+      console.log('senders table ready.')
+    } catch (sErr) {
+      if (sErr.code !== 'ER_TABLE_EXISTS_ERROR') {
+        console.error('senders migration failed:', sErr.message)
+      }
+    }
+
+    // ── Receivers Table ──
+    try {
+      await execute(`CREATE TABLE IF NOT EXISTS receivers (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(150) NOT NULL,
+        company VARCHAR(150) DEFAULT '',
+        phone VARCHAR(50) DEFAULT '',
+        phone_2 VARCHAR(50) DEFAULT '',
+        email VARCHAR(150) DEFAULT '',
+        address TEXT DEFAULT NULL,
+        address_2 VARCHAR(255) DEFAULT '',
+        city VARCHAR(100) DEFAULT '',
+        state VARCHAR(100) DEFAULT '',
+        pincode VARCHAR(20) DEFAULT '',
+        country VARCHAR(100) DEFAULT '',
+        gstin_type VARCHAR(50) DEFAULT '',
+        gstin_no VARCHAR(50) DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_receiver_name (name),
+        INDEX idx_receiver_phone (phone)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+      console.log('receivers table ready.')
+    } catch (rErr) {
+      if (rErr.code !== 'ER_TABLE_EXISTS_ERROR') {
+        console.error('receivers migration failed:', rErr.message)
+      }
+    }
+
     console.log('DB initialization successfully completed!')
   } catch (err) {
     console.error('DB Initialization/Migration Failed:', err)
