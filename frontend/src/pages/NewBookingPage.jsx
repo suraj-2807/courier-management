@@ -2689,105 +2689,110 @@ export default function NewBookingPage() {
               </div>
             </div>
 
-            {/* Per-Parcel Table Header */}
-            <div className="grid grid-cols-[1fr_1.2fr_1fr_1fr_1fr_1.2fr_1.2fr_110px] bg-surface-alt text-[10px] font-bold uppercase text-text-tertiary tracking-wider border-b border-border">
-              <div className="px-3 py-2 text-center border-r border-border">Box No.</div>
-              <div className="px-3 py-2 text-center border-r border-border">Actual Wt(Kg.)</div>
-              <div className="px-3 py-2 text-center border-r border-border">L(CM)</div>
-              <div className="px-3 py-2 text-center border-r border-border">B(CM)</div>
-              <div className="px-3 py-2 text-center border-r border-border">H(CM)</div>
-              <div className="px-3 py-2 text-center border-r border-border">Volumetric Wt(Kg.)</div>
-              <div className="px-3 py-2 text-center border-r border-border">Chargeable Wt(Kg.)</div>
-              <div className="px-2 py-2 text-center">Action</div>
-            </div>
+            {/* Per-Parcel Table */}
+            <div className="overflow-x-auto">
+              <div className="min-w-[680px]">
+                {/* Per-Parcel Table Header */}
+                <div className="grid grid-cols-[1fr_1.2fr_1fr_1fr_1fr_1.2fr_1.2fr_110px] bg-surface-alt text-[10px] font-bold uppercase text-text-tertiary tracking-wider border-b border-border">
+                  <div className="px-3 py-2 text-center border-r border-border">Box No.</div>
+                  <div className="px-3 py-2 text-center border-r border-border">Actual Wt(Kg.)</div>
+                  <div className="px-3 py-2 text-center border-r border-border">L(CM)</div>
+                  <div className="px-3 py-2 text-center border-r border-border">B(CM)</div>
+                  <div className="px-3 py-2 text-center border-r border-border">H(CM)</div>
+                  <div className="px-3 py-2 text-center border-r border-border">Volumetric Wt(Kg.)</div>
+                  <div className="px-3 py-2 text-center border-r border-border">Chargeable Wt(Kg.)</div>
+                  <div className="px-2 py-2 text-center">Action</div>
+                </div>
 
-            {/* Per-Parcel Data Rows */}
-            {parcels.map((p, pIdx) => (
-              <div key={pIdx} className="grid grid-cols-[1fr_1.2fr_1fr_1fr_1fr_1.2fr_1.2fr_110px] text-[13px] items-center hover:bg-surface-hover transition-colors border-b border-border-light last:border-0 py-1">
-                <div className="px-2 py-1 border-r border-border-light">
-                  <input type="text" value={p.box_no} readOnly className="w-full bg-transparent focus:outline-none text-xs text-center font-bold text-text-secondary" />
-                </div>
-                <div className="px-2 py-1 border-r border-border-light">
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={p.weight ?? ''}
-                    onChange={e => {
-                      updateParcel(pIdx, 'weight', e.target.value)
-                      if (parcels.length === 1) updateForm('weight', e.target.value)
-                    }}
-                    className="w-full bg-transparent focus:outline-none text-xs text-center font-bold text-navy"
-                  />
-                </div>
-                <div className="px-2 py-1 border-r border-border-light">
-                  <input
-                    type="number"
-                    placeholder="L"
-                    value={p.length ?? ''}
-                    onChange={e => {
-                      updateParcel(pIdx, 'length', e.target.value)
-                      if (parcels.length === 1) updateForm('length', e.target.value)
-                    }}
-                    className="w-full bg-transparent focus:outline-none text-xs text-center text-text-primary"
-                  />
-                </div>
-                <div className="px-2 py-1 border-r border-border-light">
-                  <input
-                    type="number"
-                    placeholder="B"
-                    value={p.breadth ?? ''}
-                    onChange={e => {
-                      updateParcel(pIdx, 'breadth', e.target.value)
-                      if (parcels.length === 1) updateForm('breadth', e.target.value)
-                    }}
-                    className="w-full bg-transparent focus:outline-none text-xs text-center text-text-primary"
-                  />
-                </div>
-                <div className="px-2 py-1 border-r border-border-light">
-                  <input
-                    type="number"
-                    placeholder="H"
-                    value={p.height ?? ''}
-                    onChange={e => {
-                      updateParcel(pIdx, 'height', e.target.value)
-                      if (parcels.length === 1) updateForm('height', e.target.value)
-                    }}
-                    className="w-full bg-transparent focus:outline-none text-xs text-center text-text-primary"
-                  />
-                </div>
-                <div className="px-2 py-1 border-r border-border-light">
-                  <input
-                    type="text"
-                    readOnly
-                    value={p.volumetric_weight ? parseFloat(p.volumetric_weight).toFixed(2) : '0.00'}
-                    className="w-full bg-transparent focus:outline-none text-xs text-center font-bold text-navy"
-                  />
-                </div>
-                <div className="px-2 py-1 border-r border-border-light">
-                  <input
-                    type="text"
-                    readOnly
-                    value={p.chargeable_weight ? parseFloat(p.chargeable_weight).toFixed(2) : '0.00'}
-                    className="w-full bg-transparent focus:outline-none text-xs text-center font-extrabold text-primary"
-                  />
-                </div>
-                <div className="px-1 text-center">
-                  {parcels.length > 1 ? (
-                    <button
-                      type="button"
-                      onClick={() => removeParcel(pIdx)}
-                      className="text-danger/70 hover:text-danger hover:bg-danger/10 p-1.5 rounded transition-colors cursor-pointer inline-flex items-center justify-center"
-                      title={`Remove Box ${p.box_no || pIdx + 1}`}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  ) : (
-                    <span className="text-[11px] text-text-tertiary select-none">-</span>
-                  )}
-                </div>
+                {/* Per-Parcel Data Rows */}
+                {parcels.map((p, pIdx) => (
+                  <div key={pIdx} className="grid grid-cols-[1fr_1.2fr_1fr_1fr_1fr_1.2fr_1.2fr_110px] text-[13px] items-center hover:bg-surface-hover transition-colors border-b border-border-light last:border-0 py-1">
+                    <div className="px-2 py-1 border-r border-border-light">
+                      <input type="text" value={p.box_no} readOnly className="w-full bg-transparent focus:outline-none text-xs text-center font-bold text-text-secondary" />
+                    </div>
+                    <div className="px-2 py-1 border-r border-border-light">
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={p.weight ?? ''}
+                        onChange={e => {
+                          updateParcel(pIdx, 'weight', e.target.value)
+                          if (parcels.length === 1) updateForm('weight', e.target.value)
+                        }}
+                        className="w-full bg-transparent focus:outline-none text-xs text-center font-bold text-navy"
+                      />
+                    </div>
+                    <div className="px-2 py-1 border-r border-border-light">
+                      <input
+                        type="number"
+                        placeholder="L"
+                        value={p.length ?? ''}
+                        onChange={e => {
+                          updateParcel(pIdx, 'length', e.target.value)
+                          if (parcels.length === 1) updateForm('length', e.target.value)
+                        }}
+                        className="w-full bg-transparent focus:outline-none text-xs text-center text-text-primary"
+                      />
+                    </div>
+                    <div className="px-2 py-1 border-r border-border-light">
+                      <input
+                        type="number"
+                        placeholder="B"
+                        value={p.breadth ?? ''}
+                        onChange={e => {
+                          updateParcel(pIdx, 'breadth', e.target.value)
+                          if (parcels.length === 1) updateForm('breadth', e.target.value)
+                        }}
+                        className="w-full bg-transparent focus:outline-none text-xs text-center text-text-primary"
+                      />
+                    </div>
+                    <div className="px-2 py-1 border-r border-border-light">
+                      <input
+                        type="number"
+                        placeholder="H"
+                        value={p.height ?? ''}
+                        onChange={e => {
+                          updateParcel(pIdx, 'height', e.target.value)
+                          if (parcels.length === 1) updateForm('height', e.target.value)
+                        }}
+                        className="w-full bg-transparent focus:outline-none text-xs text-center text-text-primary"
+                      />
+                    </div>
+                    <div className="px-2 py-1 border-r border-border-light">
+                      <input
+                        type="text"
+                        readOnly
+                        value={p.volumetric_weight ? parseFloat(p.volumetric_weight).toFixed(2) : '0.00'}
+                        className="w-full bg-transparent focus:outline-none text-xs text-center font-bold text-navy"
+                      />
+                    </div>
+                    <div className="px-2 py-1 border-r border-border-light">
+                      <input
+                        type="text"
+                        readOnly
+                        value={p.chargeable_weight ? parseFloat(p.chargeable_weight).toFixed(2) : '0.00'}
+                        className="w-full bg-transparent focus:outline-none text-xs text-center font-extrabold text-primary"
+                      />
+                    </div>
+                    <div className="px-1 text-center">
+                      {parcels.length > 1 ? (
+                        <button
+                          type="button"
+                          onClick={() => removeParcel(pIdx)}
+                          className="text-danger/70 hover:text-danger hover:bg-danger/10 p-1.5 rounded transition-colors cursor-pointer inline-flex items-center justify-center"
+                          title={`Remove Box ${p.box_no || pIdx + 1}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        <span className="text-[11px] text-text-tertiary select-none">-</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
 
             {/* Table Footer with Add Box button & Total Count */}
             <div className="p-2.5 bg-surface-alt/40 border-t border-border flex justify-between items-center">
@@ -2872,9 +2877,11 @@ export default function NewBookingPage() {
               </div>
 
               {/* Invoice Items Table */}
-              <div className="border border-border rounded-xl bg-surface">
-                {/* Table Header */}
-                <div className="bg-navy text-white grid grid-cols-[40px_45px_1fr_95px_70px_65px_80px_70px_80px_85px_45px] text-[10px] font-bold uppercase tracking-wider">
+              <div className="border border-border rounded-xl bg-surface overflow-hidden">
+                <div className="overflow-x-auto">
+                  <div className="min-w-[850px]">
+                    {/* Table Header */}
+                    <div className="bg-navy text-white grid grid-cols-[40px_45px_1fr_95px_70px_65px_80px_70px_80px_85px_45px] text-[10px] font-bold uppercase tracking-wider">
                   <div className="px-1.5 py-2.5 text-center">SR</div>
                   <div className="px-1.5 py-2.5 text-center">Box</div>
                   <div className="px-1.5 py-2.5">Description</div>
@@ -3088,6 +3095,8 @@ export default function NewBookingPage() {
                   <div></div>
                 </div>
               </div>
+            </div>
+          </div>
 
               {/* Add Item Button */}
               <button

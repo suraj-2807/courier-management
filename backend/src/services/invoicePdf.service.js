@@ -143,11 +143,13 @@ export async function generateInvoicePdf(params) {
   // Brand Colors
   const NAVY = branding.color_sidebar === 'dark' ? '#111827' : '#0D2132'
   const PRIMARY_COLOR = branding.color_primary || '#BB0013'
+  const RED = PRIMARY_COLOR
 
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: 'A4', margins: { top: 25, bottom: 25, left: 30, right: 30 } })
-    const stream = fs.createWriteStream(filePath)
-    doc.pipe(stream)
+    try {
+      const doc = new PDFDocument({ size: 'A4', margins: { top: 25, bottom: 25, left: 30, right: 30 } })
+      const stream = fs.createWriteStream(filePath)
+      doc.pipe(stream)
 
     const pageWidth = doc.page.width - 60 // margins
     const leftMargin = 30
@@ -279,8 +281,8 @@ export async function generateInvoicePdf(params) {
 
     // ─── BOX Details Banner ───
     const boxLine = `BOX NO: 1  |  DIMENSIONS (CMS) ${l.toFixed(2)} × ${b.toFixed(2)} × ${h.toFixed(2)}  |  ACTUAL WT: ${actualWeight.toFixed(2)} KG  |  CHARGEABLE WT: ${chargeableWeight.toFixed(2)} KG`
-    doc.rect(leftMargin, y, pageWidth, 18).fillAndStroke('#FEF2F2', NAVY)
-    doc.fillColor(RED).fontSize(7).font('Helvetica-Bold')
+    doc.rect(leftMargin, y, pageWidth, 18).fillAndStroke('#F8FAFC', NAVY)
+    doc.fillColor(PRIMARY_COLOR).fontSize(7).font('Helvetica-Bold')
        .text(boxLine, leftMargin + 4, y + 5, { width: pageWidth - 8, align: 'center' })
     y += 20
 
@@ -328,7 +330,7 @@ export async function generateInvoicePdf(params) {
     // ─── TOTALS ROW ───
     y += 2
     doc.rect(leftMargin, y, pageWidth, 24).strokeColor(NAVY).stroke()
-    doc.fillColor(RED).fontSize(9).font('Helvetica-Bold')
+    doc.fillColor(PRIMARY_COLOR).fontSize(9).font('Helvetica-Bold')
     doc.text('TOTAL AMOUNT', leftMargin + 4, y + 7, { width: pageWidth - colWidths.amount - 10, align: 'right' })
     doc.text(`${totalAmount.toFixed(2)}`, leftMargin + pageWidth - colWidths.amount - 4, y + 7, { width: colWidths.amount, align: 'right' })
     y += 28
@@ -339,7 +341,7 @@ export async function generateInvoicePdf(params) {
        .text('AMOUNT CHARGEABLE:', leftMargin + 6, y + 9)
     doc.fillColor('#000000').fontSize(8).font('Helvetica')
        .text(`${amountInWords} ${currencyWord} Only`, leftMargin + 120, y + 9, { width: pageWidth / 2 })
-    doc.fillColor(RED).font('Helvetica-Bold').fontSize(9)
+    doc.fillColor(PRIMARY_COLOR).font('Helvetica-Bold').fontSize(9)
        .text(`TOTAL: ${totalAmount.toFixed(2)} ${currency}`, leftMargin + pageWidth - 180, y + 9, { width: 170, align: 'right' })
     y += 34
 
@@ -366,6 +368,9 @@ export async function generateInvoicePdf(params) {
     stream.on('error', (err) => {
       reject(err)
     })
+    } catch (err) {
+      reject(err)
+    }
   })
 }
 

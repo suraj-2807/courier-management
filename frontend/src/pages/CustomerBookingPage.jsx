@@ -1865,8 +1865,10 @@ export default function CustomerBookingPage() {
 
               {/* Invoice Items Table */}
               <div className="border border-border rounded-xl overflow-hidden bg-surface">
-                {/* Table Header */}
-                <div className="bg-navy text-white grid grid-cols-[40px_45px_1fr_95px_70px_65px_80px_70px_80px_85px_45px] text-[10px] font-bold uppercase tracking-wider">
+                <div className="overflow-x-auto">
+                  <div className="min-w-[850px]">
+                    {/* Table Header */}
+                    <div className="bg-navy text-white grid grid-cols-[40px_45px_1fr_95px_70px_65px_80px_70px_80px_85px_45px] text-[10px] font-bold uppercase tracking-wider">
                   <div className="px-1.5 py-2.5 text-center">SR</div>
                   <div className="px-1.5 py-2.5 text-center">Box</div>
                   <div className="px-1.5 py-2.5">Description</div>
@@ -1977,6 +1979,8 @@ export default function CustomerBookingPage() {
                   <div></div>
                 </div>
               </div>
+            </div>
+          </div>
 
               {/* Add Item Button */}
               <button
