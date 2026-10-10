@@ -350,7 +350,7 @@ export default function BookingsPage() {
     }
   }
 
-  // Open Our Invoice (Prince Official Invoice PDF - works for drafts too)
+  // Open Our Invoice (Official Invoice PDF - works for drafts too)
   const handleOpenOurInvoiceRow = async (b) => {
     const toastId = toast.loading('Loading Our Invoice...')
     try {
@@ -378,8 +378,8 @@ export default function BookingsPage() {
     openVendorDocument(b, 'vendor_box_label')
   }
 
-  // 5. Open Our Prince Official Box / Thermal Label PDF (Tag icon)
-  const handleOpenPrinceLabelRow = async (b) => {
+  // 5. Open Our Official Box / Thermal Label PDF (Tag icon)
+  const handleOpenCompanyLabelRow = async (b) => {
     const toastId = toast.loading('Loading Our Box Label...')
     try {
       const res = await bookingsApi.downloadBoxLabels(b.id)
@@ -1237,10 +1237,10 @@ export default function BookingsPage() {
                                 <Package className="w-4 h-4" />
                               </button>
 
-                              {/* 6. Tag icon: Our Label (Prince Box / Thermal Label) */}
+                              {/* 6. Tag icon: Our Label (Official Box / Thermal Label) */}
                               <button
                                 type="button"
-                                onClick={() => handleOpenPrinceLabelRow(b)}
+                                onClick={() => handleOpenCompanyLabelRow(b)}
                                 className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                                 title="Our Official Box / Thermal Label"
                               >

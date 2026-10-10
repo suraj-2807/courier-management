@@ -225,26 +225,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          {/* Top Search Pill */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-[#9CA3AF] absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search item, order, etc"
-              value={tableSearch}
-              onChange={(e) => setTableSearch(e.target.value)}
-              className="bg-white border border-[#E5E8ED] rounded-full pl-9 pr-4 py-2 text-xs text-[#111827] placeholder-[#9CA3AF] w-56 md:w-64 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all shadow-xs"
-            />
-          </div>
-
-          <Link
-            to="/vendor-rate-import"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-[#E5E8ED] text-[#374151] hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all shadow-xs"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-[#6B7280]" />
-            Import
-          </Link>
-
           <Link
             to="/bookings/new"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-primary hover:bg-primary-dark text-white shadow-sm transition-all"

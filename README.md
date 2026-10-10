@@ -1,10 +1,10 @@
-# Prince Express – Courier & Logistics Management System
+# Courier & Logistics Management System
 
 A full-stack courier and logistics management platform built to manage the complete shipment lifecycle — from customer booking and rate calculation to shipment processing, courier integrations, tracking, label generation, and delivery operations.
 
 ## 🚀 Overview
 
-**Prince Express Dashboard** is an end-to-end courier management system developed for **Prince Express**.
+**Courier Management Dashboard** is a white-label, end-to-end courier management system with dynamic branding support.
 
 The platform connects a React-based frontend with a Node.js/Express REST API and MySQL database, while integrating external courier services for shipment booking and tracking.
 

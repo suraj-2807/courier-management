@@ -316,8 +316,8 @@ export default function BookingDetailPage() {
     await openVendorDocument(booking, 'vendor_box_label')
   }
 
-  // 5. Our Prince Box / Thermal Label (Tag icon)
-  const handleOpenPrinceLabel = async () => {
+  // 5. Our Official Box / Thermal Label (Tag icon)
+  const handleOpenCompanyLabel = async () => {
     const toastId = toast.loading('Loading Our Box Label...')
     try {
       const res = await bookingsApi.downloadBoxLabels(booking.id)
@@ -530,7 +530,7 @@ export default function BookingDetailPage() {
 
           {/* 5. Our Box Label (Tag icon) */}
           <button
-            onClick={handleOpenPrinceLabel}
+            onClick={handleOpenCompanyLabel}
             className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 text-[12px] font-bold rounded-xl transition-colors cursor-pointer"
             title="Open Our Official Box / Thermal Label"
           >

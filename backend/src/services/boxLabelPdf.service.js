@@ -3,6 +3,7 @@ import bwipjs from 'bwip-js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { getCompanyBranding } from './branding.service.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -113,8 +114,14 @@ export async function generateBoxLabelsPdf(params) {
   const totalBoxes = parseInt(shipment.no_of_pieces) || (parcels.length > 0 ? parcels.length : 1)
   const pdfPath = path.join(LABELS_DIR, `BoxLabels_${awbNumber}.pdf`)
 
-  const NAVY = '#0D2132'
-  const RED = '#BB0013'
+  // Load dynamic company branding
+  const branding = await getCompanyBranding()
+  const brandName = (branding?.firm_name || 'COURIER EXPRESS').toUpperCase()
+  const NAVY = branding?.color_primary || '#0D2132'
+  const RED = branding?.color_accent || '#BB0013'
+  const logoPath = branding?.firm_logo_path && fs.existsSync(branding.firm_logo_path)
+    ? branding.firm_logo_path
+    : LOGO_PATH
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -153,13 +160,13 @@ export async function generateBoxLabelsPdf(params) {
         doc.rect(startX, startY, w, 38).strokeColor(NAVY).lineWidth(1).stroke()
         
         // Logo or Company Brand Header
-        if (fs.existsSync(LOGO_PATH)) {
+        if (fs.existsSync(logoPath)) {
           try {
-            doc.image(LOGO_PATH, startX + 4, startY + 4, { fit: [35, 30] })
+            doc.image(logoPath, startX + 4, startY + 4, { fit: [35, 30] })
           } catch (e) {}
         }
         
-        doc.fillColor(NAVY).fontSize(9.5).font('Helvetica-Bold').text('PRINCE EXPRESS', startX + 42, startY + 6)
+        doc.fillColor(NAVY).fontSize(9.5).font('Helvetica-Bold').text(brandName, startX + 42, startY + 6)
         doc.fillColor('#4B5563').fontSize(7.5).font('Helvetica').text(formattedDate, startX + 42, startY + 20)
 
         // Vertical divider 1

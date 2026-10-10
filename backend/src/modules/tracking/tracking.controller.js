@@ -1,5 +1,6 @@
 import { query } from '../../config/db.js'
 import { decrypt } from '../../utils/encryption.js'
+import { getCompanyBranding } from '../../services/branding.service.js'
 
 // ─── Helper: safely parse credentials (encrypted or plain JSON) ────
 function parseCredentials(raw) {
@@ -675,9 +676,14 @@ export const liveTrack = async (req, res) => {
       }
     }
 
-// Helper to attach Prince Express origin & manifest events
-function attachCompanyOriginEvents(result, matchedShipment) {
+// Helper to attach company origin & manifest events
+async function attachCompanyOriginEvents(result, matchedShipment) {
   if (!result) return
+
+  // Load dynamic branding
+  const branding = await getCompanyBranding()
+  const brandNameUpper = (branding?.firm_name || 'COURIER EXPRESS').toUpperCase()
+  const brandNameLower = (branding?.firm_name || 'Courier Express').toLowerCase()
 
   const originCity = (matchedShipment?.s_city || matchedShipment?.sender_city || matchedShipment?.origin || result.shipmentInfo?.origin || 'SURAT').toUpperCase()
   const originCountry = (matchedShipment?.s_country || matchedShipment?.sender_country || result.shipmentInfo?.originCountry || 'INDIA').toUpperCase()
@@ -705,7 +711,7 @@ function attachCompanyOriginEvents(result, matchedShipment) {
     matchedShipment?.is_locked == 1 ||
     matchedShipment?.is_locked === true ||
     (matchedShipment?.vendor_awb_number && String(matchedShipment.vendor_awb_number).trim() !== '' && matchedShipment.vendor_awb_number !== matchedShipment.tracking_number) ||
-    (result.vendor && result.vendor !== 'Prince Express' && result.vendorCode !== 'prince')
+    (result.vendor && result.vendor.toLowerCase() !== brandNameLower && result.vendorCode !== 'company')
   )
 
   let currentEvents = Array.isArray(result.events) ? result.events.slice() : []
@@ -726,8 +732,8 @@ function attachCompanyOriginEvents(result, matchedShipment) {
   currentEvents = currentEvents.filter(e => {
     const st = (e.status || '').toLowerCase().trim()
     const loc = (e.location || '').toLowerCase().trim()
-    // Keep events from PRINCE EXPRESS
-    if (loc.includes('prince express')) return true
+    // Keep events from our company
+    if (loc.includes(brandNameLower)) return true
     // Remove vendor placeholder events
     for (const pattern of vendorPlaceholderPatterns) {
       if (st.includes(pattern)) return false
@@ -759,7 +765,7 @@ function attachCompanyOriginEvents(result, matchedShipment) {
     companyEvents.push({
       date: dateStr,
       time: timeStr,
-      location: `${originCity}, ${originCountry} (PRINCE EXPRESS HUB)`,
+      location: `${originCity}, ${originCountry} (${brandNameUpper} HUB)`,
       status: 'Shipment Manifested & Dispatched from Origin Hub',
       rawDate: dateStr,
       rawTime: timeStr
@@ -769,7 +775,7 @@ function attachCompanyOriginEvents(result, matchedShipment) {
     companyEvents.push({
       date: dateStr,
       time: timeStr,
-      location: `${originCity}, ${originCountry} (PRINCE EXPRESS)`,
+      location: `${originCity}, ${originCountry} (${brandNameUpper})`,
       status: 'Shipment Booked & Order Created',
       rawDate: dateStr,
       rawTime: timeStr
@@ -809,7 +815,7 @@ function attachCompanyOriginEvents(result, matchedShipment) {
               parcels: matchedShipment.parcels
             }
           }
-          attachCompanyOriginEvents(result, matchedShipment)
+          await attachCompanyOriginEvents(result, matchedShipment)
           return res.json({ success: true, tracking: result })
         }
       } catch (trackErr) {
@@ -846,7 +852,7 @@ function attachCompanyOriginEvents(result, matchedShipment) {
                 parcels: matchedShipment.parcels
               }
             }
-            attachCompanyOriginEvents(result, matchedShipment)
+            await attachCompanyOriginEvents(result, matchedShipment)
             return res.json({ success: true, tracking: result })
           }
         } catch (err) {
@@ -857,10 +863,12 @@ function attachCompanyOriginEvents(result, matchedShipment) {
 
     // ── 6. Fallback: If shipment exists in DB, return company origin events ──
     if (matchedShipment) {
-      const vendorName = matchedShipment.vendor_name || 'Prince Express'
+      const companyBranding = await getCompanyBranding()
+      const companyName = companyBranding?.firm_name || 'Courier Express'
+      const vendorName = matchedShipment.vendor_name || companyName
       const initialResult = {
-        vendor: 'Prince Express',
-        vendorCode: 'prince',
+        vendor: companyName,
+        vendorCode: 'company',
         shipmentInfo: {
           awbNo: matchedShipment.tracking_number || matchedShipment.order_id,
           vendorAwbNo: matchedShipment.vendor_awb_number || '',
@@ -902,7 +910,7 @@ function attachCompanyOriginEvents(result, matchedShipment) {
           parcels: matchedShipment.parcels
         }
       }
-      attachCompanyOriginEvents(initialResult, matchedShipment)
+      await attachCompanyOriginEvents(initialResult, matchedShipment)
       return res.json({ success: true, tracking: initialResult })
     }
 
