@@ -1,5 +1,5 @@
 import express from 'express'
-import { authMiddleware } from '../../middlewares/auth.middleware.js'
+import authMiddleware from '../../middlewares/auth.middleware.js'
 import { requireModulePermission } from '../../middlewares/permission.middleware.js'
 import {
   getManualEntries,
