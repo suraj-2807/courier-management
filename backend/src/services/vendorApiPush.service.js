@@ -2,6 +2,7 @@ import { decrypt } from '../utils/encryption.js'
 import { createAdapter } from '../courierAdapters/adapterRegistry.js'
 import { parseCredentials } from '../courierAdapters/PacificAdapter.js'
 import { query, execute } from '../config/db.js'
+import { isSettingEnabled } from '../modules/systemSettings/systemSettings.controller.js'
 
 /**
  * Check if a shipment was already created in Pacific Express by querying their Tracking API.
@@ -166,17 +167,33 @@ export async function pushShipmentToVendor(vendorConfigId, shipmentId, shipmentD
 
   try {
     // Step 1: Fetch vendor config
-    const configRows = await query(
-      'SELECT * FROM vendor_api_configs WHERE id = ?',
-      [vendorConfigId]
-    )
+    if (vendorConfigId === 'mock_test_vendor' || String(vendorConfigId).startsWith('mock')) {
+      config = {
+        id: 'mock_test_vendor',
+        name: 'Mock Test Carrier (Sandbox)',
+        vendor_code: 'mock_courier',
+        environment: 'test',
+        is_active: true
+      }
+    } else {
+      const configRows = await query(
+        'SELECT * FROM vendor_api_configs WHERE id = ?',
+        [vendorConfigId]
+      )
 
-    if (configRows.length === 0) throw new Error('Vendor config not found')
-    config = configRows[0]
+      if (configRows.length === 0) throw new Error('Vendor config not found')
+      config = configRows[0]
 
-    if (!config.is_active) {
-      throw new Error('Vendor API is currently inactive')
+      if (!config.is_active) {
+        throw new Error('Vendor API is currently inactive')
+      }
     }
+
+    // Check if test / simulation mode is active (Global or per-vendor config)
+    const isGlobalTest = (process.env.API_TEST_MODE === 'true') || await isSettingEnabled('api_test_mode', false)
+    const isVendorTest = config.environment === 'test' || config.environment === 'sandbox' || config.environment === 'mock' ||
+      ['mock', 'test', 'mock_courier', 'test_courier', 'sandbox'].includes(String(config.vendor_code).toLowerCase())
+    const isTestMode = isGlobalTest || isVendorTest || Boolean(shipmentData?.test_mode)
 
     // Step 2: Create adapter
     const adapter = createAdapter(config)
@@ -190,7 +207,72 @@ export async function pushShipmentToVendor(vendorConfigId, shipmentId, shipmentD
     // Step 5: Build headers
     const headers = adapter.buildHeaders(authContext)
 
-    // Step 6: Send request
+    // IF TEST / MOCK MODE: Simulate successful vendor API response without calling external server
+    if (isTestMode) {
+      console.log(`[pushShipmentToVendor] 🧪 API Testing Mode Active! Simulating vendor push for ${config.name || config.vendor_code}`)
+      const vendorPrefix = (config.vendor_code || 'AWB').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 4) || 'MOCK'
+      const randAwbNum = Math.floor(10000000 + Math.random() * 90000000)
+      const mockAwb = `TEST-${vendorPrefix}-${randAwbNum}`
+      const mockFwd = `FWD-${Math.floor(10000000 + Math.random() * 90000000)}`
+      const mockTrackUrl = `https://mock-carrier-tracking.test/track?awb=${mockAwb}`
+
+      responseStatus = 200
+      responseBody = {
+        status: 'success',
+        simulated: true,
+        test_mode: true,
+        vendor: config.name || config.vendor_code,
+        message: 'Test / Mock mode: Shipment booked successfully without calling external API',
+        awb_number: mockAwb,
+        forwarding_number: mockFwd,
+        tracking_url: mockTrackUrl,
+        timestamp: new Date().toISOString()
+      }
+
+      const parsed = {
+        success: true,
+        awbNumber: mockAwb,
+        forwardingNumber: mockFwd,
+        trackingUrl: mockTrackUrl,
+        labelUrl: '',
+        errorMessage: null
+      }
+
+      // Log the mock attempt
+      await _logPushAttempt({
+        vendorConfigId: config.id === 'mock_test_vendor' ? null : config.id,
+        shipmentId,
+        requestUrl: `[SIMULATED_TEST_MODE] ${adapter.getShipmentUrl() || 'https://sandbox.carrier.local'}`,
+        requestPayload,
+        responseStatus: 200,
+        responseBody,
+        trackingNumber: mockAwb,
+        status: 'success',
+        errorMessage: null
+      })
+
+      // Update shipment with vendor response
+      const shipmentVendorUpdates = {
+        vendor_awb_number: mockAwb,
+        vendor_tracking_url: mockTrackUrl,
+        vendor_label_url: '',
+        vendor_push_status: 'success'
+      }
+      if (mockFwd) {
+        shipmentVendorUpdates.forwarding_no = mockFwd
+      }
+      await _updateShipmentVendorData(shipmentId, shipmentVendorUpdates)
+
+      return {
+        ...parsed,
+        requestPayload,
+        responseStatus: 200,
+        responseBody,
+        simulated: true
+      }
+    }
+
+    // Step 6: Send request (Real live network call)
     const response = await fetch(adapter.getShipmentUrl(), {
       method: adapter.getHttpMethod(),
       headers,
@@ -391,6 +473,14 @@ export async function pushShipmentToVendor(vendorConfigId, shipmentId, shipmentD
  * Uses the adapter pipeline.
  */
 export async function authenticateVendor(config) {
+  if (!config) return 'mock_test_token'
+  const isGlobalTest = (process.env.API_TEST_MODE === 'true') || await isSettingEnabled('api_test_mode', false)
+  const isVendorTest = config.environment === 'test' || config.environment === 'sandbox' || config.environment === 'mock' ||
+    ['mock', 'test', 'mock_courier', 'test_courier', 'sandbox'].includes(String(config.vendor_code).toLowerCase()) ||
+    config.id === 'mock_test_vendor'
+  if (isGlobalTest || isVendorTest) {
+    return `mock_auth_token_${Date.now()}`
+  }
   const adapter = createAdapter(config)
   const authContext = await adapter.authenticate()
   return authContext?.token || null
@@ -405,6 +495,24 @@ export async function authenticateVendor(config) {
  */
 export async function pushToVendorApi(config, shipmentData) {
   try {
+    const isGlobalTest = (process.env.API_TEST_MODE === 'true') || await isSettingEnabled('api_test_mode', false)
+    const isVendorTest = config?.environment === 'test' || config?.environment === 'sandbox' || config?.environment === 'mock' ||
+      ['mock', 'test', 'mock_courier', 'test_courier', 'sandbox'].includes(String(config?.vendor_code).toLowerCase()) ||
+      config?.id === 'mock_test_vendor'
+
+    if (isGlobalTest || isVendorTest || shipmentData?.test_mode) {
+      const vendorPrefix = (config?.vendor_code || 'AWB').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 4) || 'MOCK'
+      const mockAwb = `TEST-${vendorPrefix}-${Math.floor(10000000 + Math.random() * 90000000)}`
+      return {
+        success: true,
+        trackingNumber: mockAwb,
+        requestPayload: { test_mode: true, simulated: true, data: shipmentData },
+        responseStatus: 200,
+        responseBody: { status: 'success', test_mode: true, simulated: true, awb_number: mockAwb, message: 'Simulated API Test Push' },
+        error: null
+      }
+    }
+
     const adapter = createAdapter(config)
 
     // Authenticate

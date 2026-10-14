@@ -1492,17 +1492,23 @@ export const pushBookingToApi = async (req, res) => {
     let targetProductCode = product_code || booking.product_code || ''
 
     if (targetVendorConfigId) {
-      const vacRows = await query('SELECT * FROM vendor_api_configs WHERE id = ?', [targetVendorConfigId])
-      if (vacRows.length > 0) {
-        const vac = vacRows[0]
-        if (!targetVendorCode) targetVendorCode = vac.vendor_code || ''
-        if (!targetServiceCode && vac.available_services) {
-          let svcs = vac.available_services
-          if (typeof svcs === 'string') {
-            try { svcs = JSON.parse(svcs) } catch { }
-          }
-          if (Array.isArray(svcs) && svcs.length > 0) {
-            targetServiceCode = svcs[0].code || svcs[0].id || svcs[0].service || ''
+      if (targetVendorConfigId === 'mock_test_vendor' || String(targetVendorConfigId).startsWith('mock')) {
+        targetVendorCode = targetVendorCode || 'MOCK'
+        targetServiceCode = targetServiceCode || 'EXP'
+        targetProductCode = targetProductCode || 'SPX'
+      } else {
+        const vacRows = await query('SELECT * FROM vendor_api_configs WHERE id = ?', [targetVendorConfigId])
+        if (vacRows.length > 0) {
+          const vac = vacRows[0]
+          if (!targetVendorCode) targetVendorCode = vac.vendor_code || ''
+          if (!targetServiceCode && vac.available_services) {
+            let svcs = vac.available_services
+            if (typeof svcs === 'string') {
+              try { svcs = JSON.parse(svcs) } catch { }
+            }
+            if (Array.isArray(svcs) && svcs.length > 0) {
+              targetServiceCode = svcs[0].code || svcs[0].id || svcs[0].service || ''
+            }
           }
         }
       }
@@ -1515,7 +1521,17 @@ export const pushBookingToApi = async (req, res) => {
     }
 
     if (!booking.vendor_config_id) {
-      return res.status(400).json({ success: false, message: 'No vendor API selected for this booking. Please select a vendor first.' })
+      if (req.body.mark_as_booked || req.body.local_booking) {
+        await execute(
+          `UPDATE shipments SET status = 'booked', vendor_push_status = 'skipped' WHERE id = ?`,
+          [id]
+        )
+        return res.json({
+          success: true,
+          message: 'Booking confirmed & marked as booked (Local dispatch without vendor API).'
+        })
+      }
+      return res.status(400).json({ success: false, message: 'No vendor API selected for this booking. Please select a vendor first or book locally.' })
     }
 
     // Build vendor data

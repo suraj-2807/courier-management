@@ -327,8 +327,14 @@ export default function BookingsPage() {
 
     setPushingId(booking.id)
     try {
-      const res = await pushToApiMutation.mutateAsync(booking.id)
-      toast.success(res.message || 'Booking pushed to Vendor API!')
+      const isTestMode = localStorage.getItem('courier_api_test_mode') === 'true'
+      const res = await pushToApiMutation.mutateAsync({
+        id: booking.id,
+        payload: {
+          test_mode: isTestMode
+        }
+      })
+      toast.success(res.message || (isTestMode ? 'Simulated Vendor API Push Successful! (Test Mode)' : 'Booking pushed to Vendor API!'))
       refetch()
     } catch (err) {
       toast.error(err?.response?.data?.message || err.message || 'Failed to push booking')

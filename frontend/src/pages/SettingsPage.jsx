@@ -27,13 +27,16 @@ import {
   ExternalLink,
   Database,
   Play,
-  RotateCw
+  RotateCw,
+  FlaskConical,
+  CheckCircle2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useBrandingStore } from '../store/brandingStore'
 import { useAuthStore } from '../store/authStore'
 import { saveCompanyBranding, resetPortal } from '../api/setup.api'
 import { getDemoDataStatus, seedDemoData, resetDemoData } from '../api/demoData.api'
+import { systemSettingsApi } from '../api/systemSettings.api'
 
 const COLOR_PRESETS = [
   { name: 'Corporate Royal Blue', primary: '#2563EB', accent: '#0F1014' },
@@ -68,6 +71,46 @@ export default function SettingsPage() {
   const [seedingDemo, setSeedingDemo] = useState(false)
   const [resettingDemo, setResettingDemo] = useState(false)
   const [demoResetModalOpen, setDemoResetModalOpen] = useState(false)
+
+  // API Testing / Mock Mode State
+  const [apiTestMode, setApiTestMode] = useState(() => {
+    try {
+      return localStorage.getItem('courier_api_test_mode') === 'true'
+    } catch {
+      return false
+    }
+  })
+  const [savingTestMode, setSavingTestMode] = useState(false)
+
+  const loadSystemSettings = async () => {
+    try {
+      const res = await systemSettingsApi.getAll()
+      if (res?.settings?.api_test_mode !== undefined) {
+        setApiTestMode(Boolean(res.settings.api_test_mode))
+      }
+    } catch (e) {
+      console.warn('Failed to load system settings:', e.message)
+    }
+  }
+
+  useEffect(() => {
+    loadSystemSettings()
+  }, [])
+
+  const handleToggleApiTestMode = async () => {
+    const nextVal = !apiTestMode
+    setSavingTestMode(true)
+    try {
+      localStorage.setItem('courier_api_test_mode', String(nextVal))
+      setApiTestMode(nextVal)
+      await systemSettingsApi.update({ api_test_mode: nextVal })
+      toast.success(nextVal ? '🧪 API Testing Mode ENABLED (Sandbox Simulator)' : '🟢 Live Carrier API Mode Active')
+    } catch (e) {
+      toast.error('Failed to update API test mode: ' + e.message)
+    } finally {
+      setSavingTestMode(false)
+    }
+  }
 
   const fileInputRef = useRef(null)
   const [logoFile, setLogoFile] = useState(null)
@@ -770,7 +813,79 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* ── Card 4: Super Admin Demo Data Showcase & Management ── */}
+        {/* ── Card 4: API Testing & Sandbox Mode ── */}
+        <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
+          <div className="p-6 border-b border-border-light bg-surface-alt/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-800 border border-amber-500/20 mb-1.5">
+                <FlaskConical className="w-3.5 h-3.5 text-amber-600" />
+                <span>Developer & Testing Environment</span>
+              </div>
+              <h3 className="text-base font-extrabold text-navy flex items-center gap-2">
+                API Testing & Sandbox Simulator Mode
+              </h3>
+              <p className="text-xs text-text-tertiary mt-1 max-w-xl leading-relaxed">
+                Enable testing mode to book shipments and test carrier integrations without making live API requests or charging accounts. Pushes simulate realistic carrier AWBs (e.g. <code>TEST-AWB-...</code>) and successful status transitions.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleToggleApiTestMode}
+                disabled={savingTestMode}
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs ${
+                  apiTestMode
+                    ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                    : 'bg-surface hover:bg-surface-hover border border-border text-navy'
+                }`}
+              >
+                {savingTestMode ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FlaskConical className={`w-4 h-4 ${apiTestMode ? 'text-white' : 'text-amber-600'}`} />
+                )}
+                <span>{apiTestMode ? '🧪 API Testing Mode: ENABLED' : 'Enable Testing Mode'}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className={`p-4 rounded-xl border transition-all ${apiTestMode ? 'bg-amber-500/5 border-amber-500/30 ring-2 ring-amber-500/10' : 'bg-surface border-border'}`}>
+              <div className="flex items-center gap-2 text-xs font-bold text-navy">
+                <span className={`w-2.5 h-2.5 rounded-full ${apiTestMode ? 'bg-amber-500 animate-pulse' : 'bg-gray-300'}`} />
+                <span>Simulation Engine</span>
+              </div>
+              <p className="text-[11px] text-text-tertiary mt-1.5 leading-relaxed">
+                {apiTestMode
+                  ? 'All carrier push requests (FlySwift, Pacific, etc.) are safely mocked with instant 200 OK responses.'
+                  : 'Live carrier endpoints will be contacted on shipment push. Valid API credentials required.'}
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-border bg-surface">
+              <div className="flex items-center gap-2 text-xs font-bold text-navy">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Zero-API Local Booking</span>
+              </div>
+              <p className="text-[11px] text-text-tertiary mt-1.5 leading-relaxed">
+                Direct in-house bookings are always supported by selecting <strong>"— None (Local Only) —"</strong> in the booking form.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-border bg-surface">
+              <div className="flex items-center gap-2 text-xs font-bold text-navy">
+                <Database className="w-4 h-4 text-primary" />
+                <span>Audit & Log Tracking</span>
+              </div>
+              <p className="text-[11px] text-text-tertiary mt-1.5 leading-relaxed">
+                Every simulated booking creates regular internal tracking events and waybills just like production shipments.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Card 5: Super Admin Demo Data Showcase & Management ── */}
         {userIsSuperAdmin && (
           <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
             <div className="p-6 border-b border-border-light bg-surface-alt/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

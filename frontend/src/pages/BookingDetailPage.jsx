@@ -362,16 +362,18 @@ export default function BookingDetailPage() {
 
   const handlePushToApi = async () => {
     try {
+      const isTestMode = localStorage.getItem('courier_api_test_mode') === 'true'
       await pushToApiMutation.mutateAsync({
         id: booking.id,
         payload: {
           vendor_config_id: booking.vendor_config_id,
           vendor_code: booking.vendor_code,
           service_code: booking.service_code,
-          product_code: booking.product_code
+          product_code: booking.product_code,
+          test_mode: isTestMode
         }
       })
-      toast.success('Successfully pushed to vendor API!')
+      toast.success(isTestMode ? 'Pushed successfully in API Testing Mode! (Mock AWB assigned)' : 'Successfully pushed to vendor API!')
       refetch()
       refetchLiveTracking()
     } catch (err) {

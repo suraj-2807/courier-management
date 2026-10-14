@@ -32,9 +32,10 @@ import {
   Send,
   Plus,
   Trash2,
-  Receipt,
   Lock,
-  Eye
+  Eye,
+  FlaskConical,
+  CheckCircle2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -503,6 +504,33 @@ export default function NewBookingPage() {
     queryFn: systemSettingsApi.getAll
   })
   const allowPostPushEdit = sysSettingsData?.settings?.allow_post_push_billing_edit !== false
+
+  // API Testing / Mock Mode State
+  const [apiTestMode, setApiTestMode] = useState(() => {
+    try {
+      return localStorage.getItem('courier_api_test_mode') === 'true'
+    } catch {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    if (sysSettingsData?.settings?.api_test_mode !== undefined) {
+      setApiTestMode(Boolean(sysSettingsData.settings.api_test_mode))
+    }
+  }, [sysSettingsData])
+
+  const handleToggleTestMode = async () => {
+    const nextVal = !apiTestMode
+    setApiTestMode(nextVal)
+    try {
+      localStorage.setItem('courier_api_test_mode', String(nextVal))
+      await systemSettingsApi.update({ api_test_mode: nextVal })
+      toast.success(nextVal ? '🧪 API Testing Mode ENABLED (Sandbox Simulator)' : '🟢 Live Carrier API Mode Active')
+    } catch (e) {
+      toast.success(nextVal ? '🧪 API Testing Mode ON' : 'Live Carrier API Mode Active')
+    }
+  }
 
   const isLocked = !!editBookingData?.is_locked
   const isGeneralLocked = isLocked
@@ -1252,6 +1280,7 @@ export default function NewBookingPage() {
     service_code: form.service_code || '',
     product_code: form.product_code || '',
     cod_amount: parseFloat(form.cod_amount) || 0,
+    test_mode: Boolean(apiTestMode || form.vendor_config_id === 'mock_test_vendor' || selectedVendor?.environment === 'test'),
 
     // Invoice & export
     invoice_no: form.invoice_no,
@@ -1522,22 +1551,18 @@ export default function NewBookingPage() {
     setPushError(null)
     if (!validateForm()) return
 
-    if (!form.vendor_config_id) {
-      const msg = 'Please select a Vendor API to push to'
-      setPushError(msg)
-      toast.error(msg)
-      return
-    }
+    // If no vendor_config_id is selected, this is a direct/local booking (no API push required)
 
     setSubmitting(true)
     try {
       const payload = buildPayload()
-      console.log('[NewBookingPage] 🚀 handleSubmit (Push to API) payload linking info:', {
+      console.log('[NewBookingPage] 🚀 handleSubmit payload linking info:', {
         from_request: payload.from_request,
         request_awb: payload.request_awb,
         tracking_number: payload.tracking_number,
         vendor_config_id: payload.vendor_config_id,
-        vendor_code: payload.vendor_code
+        vendor_code: payload.vendor_code,
+        test_mode: payload.test_mode
       })
       const result = await createBooking.mutateAsync(payload)
       console.log('[NewBookingPage] 🚀 handleSubmit createBooking result:', {
@@ -1579,7 +1604,8 @@ export default function NewBookingPage() {
 
       if (vendorPushed) {
         setPushError(null)
-        toast.success(`Booking created & pushed! Our AWB: ${ourAwb} | Vendor AWB: ${vendorAwb}`)
+        const isSimulated = result?.vendor_result?.simulated || payload.test_mode
+        toast.success(`Booking created & pushed! Our AWB: ${ourAwb} | Vendor AWB: ${vendorAwb}${isSimulated ? ' (Test Mode)' : ''}`)
         navigate(detailPath)
       } else if (form.vendor_config_id) {
         const errMsg = `Vendor API Push Failed: ${vendorErr || 'Validation or connection error'}. Shipment saved as AWB: ${ourAwb}`
@@ -1587,7 +1613,8 @@ export default function NewBookingPage() {
         toast.error(errMsg, { duration: 10000 })
         window.scrollTo({ top: 0, behavior: 'smooth' })
       } else {
-        toast.success(`Booking created! Our AWB: ${ourAwb}`)
+        setPushError(null)
+        toast.success(`Shipment booked successfully! Our AWB: ${ourAwb}`)
         navigate(detailPath)
       }
     } catch (err) {
@@ -2241,7 +2268,31 @@ export default function NewBookingPage() {
           {/* ── Column 3: Courier & Vendor API Details ── */}
           <div className="bg-surface rounded-2xl border border-border p-5 shadow-xs flex flex-col justify-between">
             <div>
-              <RedBadge title="Courier & Vendor API" icon={Plug} />
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <RedBadge title="Courier & Vendor API" icon={Plug} />
+                <button
+                  type="button"
+                  onClick={handleToggleTestMode}
+                  title="Toggle API Testing / Sandbox Simulator Mode"
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+                    apiTestMode
+                      ? 'bg-amber-500/10 border-amber-500/40 text-amber-700 ring-2 ring-amber-500/20 shadow-xs'
+                      : 'bg-surface hover:bg-surface-hover border-border text-text-tertiary'
+                  }`}
+                >
+                  <FlaskConical className={`w-3.5 h-3.5 ${apiTestMode ? 'text-amber-600 animate-pulse' : 'text-text-tertiary'}`} />
+                  <span>{apiTestMode ? '🧪 Test Mode: ON' : 'API Test Mode'}</span>
+                </button>
+              </div>
+
+              {apiTestMode && (
+                <div className="mb-4 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-[11px] text-amber-900 flex items-start gap-2 animate-fade-in">
+                  <FlaskConical className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-extrabold">API Sandbox Active:</span> Vendor pushes will generate realistic simulated AWBs without calling external carrier servers. You can also select <em>"— None (Local Only) —"</em> for zero-API bookings.
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-4">
                 <fieldset disabled={isGeneralLocked} className="contents">
@@ -2277,14 +2328,21 @@ export default function NewBookingPage() {
                     }}
                     className={`w-full bg-transparent focus:outline-none text-[13px] text-primary font-bold cursor-pointer ${isLocked ? 'cursor-not-allowed text-gray-500 opacity-75' : ''}`}
                   >
-                    <option value="">— None (Local Only) —</option>
+                    <option value="">— None (Local Only / No API) —</option>
                     {activeVendors.map(v => (
                       <option key={v.id} value={v.id}>
-                        {v.name} {v.vendor_code ? `(${v.vendor_code})` : ''}
+                        {v.name} {v.vendor_code ? `(${v.vendor_code})` : ''} {v.environment === 'test' ? '🧪 [TEST]' : ''}
                       </option>
                     ))}
                   </select>
                 </CompactField>
+
+                {!form.vendor_config_id && (
+                  <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200/80 rounded-xl p-2.5 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span>Direct Local Booking: No external carrier API will be called. Our tracking number & waybill are generated immediately.</span>
+                  </div>
+                )}
 
                 {form.vendor_config_id && (
                   <>
@@ -3210,21 +3268,30 @@ export default function NewBookingPage() {
                   )}
                 </button>
 
-                {/* PUSH TO API */}
+                {/* DYNAMIC SUBMIT BUTTON: DIRECT BOOKING / API PUSH / TEST SIMULATION */}
                 <button
                   type="submit"
                   disabled={submitting || savingDraft}
-                  className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white text-xs font-bold shadow-xs transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className={`px-5 py-2.5 rounded-xl text-white text-xs font-bold shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 ${
+                    form.vendor_config_id
+                      ? (apiTestMode ? 'bg-amber-600 hover:bg-amber-700' : 'bg-primary hover:bg-primary-dark')
+                      : 'bg-emerald-600 hover:bg-emerald-700'
+                  }`}
                 >
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Pushing to API...
+                      {form.vendor_config_id ? (apiTestMode ? 'Simulating Push...' : 'Pushing to API...') : 'Booking Shipment...'}
+                    </>
+                  ) : form.vendor_config_id ? (
+                    <>
+                      {apiTestMode ? <FlaskConical className="w-4 h-4" /> : <Send className="w-4 h-4" />}
+                      {apiTestMode ? 'Book & Push (Test Mode)' : 'Push to API'}
                     </>
                   ) : (
                     <>
-                      <Send className="w-4 h-4" />
-                      Push to API
+                      <CheckCircle2 className="w-4 h-4" />
+                      Confirm & Book Shipment (No API)
                     </>
                   )}
                 </button>

@@ -1,6 +1,7 @@
 import GenericAdapter from './GenericAdapter.js'
 import FlySwiftAdapter from './FlySwiftAdapter.js'
 import PacificAdapter from './PacificAdapter.js'
+import MockAdapter from './MockAdapter.js'
 
 /**
  * Adapter Registry — resolves the correct courier adapter by vendor_code.
@@ -13,6 +14,13 @@ import PacificAdapter from './PacificAdapter.js'
  * Any vendor_code not in this map falls back to GenericAdapter (template-driven).
  */
 const ADAPTERS = {
+  'mock': MockAdapter,
+  'test': MockAdapter,
+  'testing': MockAdapter,
+  'mock_courier': MockAdapter,
+  'test_courier': MockAdapter,
+  'sandbox': MockAdapter,
+  'simulator': MockAdapter,
   'flyswift': FlySwiftAdapter,
   'trackmate': FlySwiftAdapter,   // Alias — same vendor engine, different branding
   'acx': FlySwiftAdapter,         // ACX International Courier

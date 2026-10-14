@@ -33,7 +33,8 @@ import {
   ChevronDown,
   Upload,
   Wallet,
-  Package
+  Package,
+  FlaskConical
 } from 'lucide-react'
 import {
   getApiSettings,
@@ -55,6 +56,7 @@ const AUTH_TYPES = [
   { value: 'token', label: 'Token (Bearer)', desc: 'Separate auth endpoint → get token → use in headers' },
   { value: 'inline', label: 'Inline (Payload)', desc: 'Credentials sent directly in the request payload' },
   { value: 'api_key', label: 'API Key (Header)', desc: 'API key sent as a custom header' },
+  { value: 'mock', label: '🧪 Mock / Simulator', desc: 'Sandbox simulation mode for testing bookings and tracking without real API' },
   { value: 'manual', label: 'Manual / No-API', desc: 'No vendor API. Manage entries manually & serve via public REST API' }
 ]
 
@@ -132,6 +134,32 @@ const EMPTY_RESTRICTION = { code: '', label: '', countries: '', min_weight: '', 
 
 // Quick configuration presets for popular courier partners
 const VENDOR_PRESETS = [
+  {
+    id: 'mock_carrier',
+    name: '🧪 Mock Test Carrier (Sandbox Simulator)',
+    badge: 'API Testing Mode',
+    color: '#d97706',
+    values: {
+      name: 'Mock Test Carrier (Sandbox Simulator)',
+      vendor_code: 'mock_courier',
+      auth_type: 'mock',
+      shipment_api_url: 'https://sandbox.mock-carrier.local/v1/shipments/create',
+      tracking_api_url: 'https://sandbox.mock-carrier.local/v1/tracking?awb={tracking_no}',
+      shipment_api_method: 'POST',
+      available_services: [
+        { code: 'EXP', label: 'Express Air (Simulated)' },
+        { code: 'STD', label: 'Standard Surface (Simulated)' },
+        { code: 'ECO', label: 'Economy International (Simulated)' }
+      ],
+      available_vendor_codes: [{ code: 'MOCK', label: 'MOCK' }],
+      available_product_codes: [
+        { code: 'SPX', label: 'Sample Parcel (SPX)' },
+        { code: 'DOX', label: 'Document (DOX)' }
+      ],
+      environment: 'test',
+      is_active: true
+    }
+  },
   {
     id: 'sairaj',
     name: 'Sairaj International',
@@ -409,15 +437,25 @@ export default function ApiSettingsPage() {
   })
 
   const systemSettings = sysSettingsData?.settings || {}
+  const isApiTestMode = Boolean(systemSettings.api_test_mode)
 
   const updateSysSettingsMutation = useMutation({
     mutationFn: systemSettingsApi.update,
     onSuccess: () => {
-      toast.success('System preference updated successfully')
       queryClient.invalidateQueries({ queryKey: ['system-settings'] })
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Failed to update setting')
   })
+
+  const handleToggleGlobalTestMode = () => {
+    const nextVal = !isApiTestMode
+    try { localStorage.setItem('courier_api_test_mode', String(nextVal)) } catch {}
+    updateSysSettingsMutation.mutate({ api_test_mode: nextVal }, {
+      onSuccess: () => {
+        toast.success(nextVal ? '🧪 API Testing Mode ENABLED (Sandbox Simulator)' : '🟢 Live Carrier API Mode Active')
+      }
+    })
+  }
 
   // Mutations
   const createMutation = useMutation({
@@ -810,7 +848,20 @@ export default function ApiSettingsPage() {
               Manage your vendor API connections, test authentication, and monitor API logs.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={handleToggleGlobalTestMode}
+              title="Toggle API Testing / Sandbox Mode across the entire portal"
+              className={`flex items-center gap-2 px-3.5 py-2 border text-[13px] font-bold rounded-xl transition-all cursor-pointer ${
+                isApiTestMode
+                  ? 'bg-amber-500/10 border-amber-500/40 text-amber-800 ring-2 ring-amber-500/20 shadow-xs'
+                  : 'bg-surface hover:bg-surface-hover border-border text-navy'
+              }`}
+            >
+              <FlaskConical className={`w-4 h-4 ${isApiTestMode ? 'text-amber-600 animate-pulse' : 'text-text-tertiary'}`} />
+              <span>{isApiTestMode ? '🧪 API Testing Mode: ON' : 'API Testing Mode: OFF'}</span>
+            </button>
             <button
               onClick={() => setShowCountryModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-surface-hover border border-border text-navy text-[13px] font-bold rounded-xl transition-colors cursor-pointer"
@@ -837,6 +888,32 @@ export default function ApiSettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* ─── API Testing Mode Banner ─── */}
+      {isApiTestMode && (
+        <div className="mb-5 bg-amber-50 border border-amber-200/80 rounded-2xl p-4 flex items-center justify-between gap-4 text-amber-900 shadow-xs animate-fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 text-amber-700 font-extrabold text-lg">
+              🧪
+            </div>
+            <div>
+              <h4 className="text-sm font-extrabold text-amber-950">
+                API Testing & Sandbox Simulation Mode Active
+              </h4>
+              <p className="text-xs text-amber-800/90 mt-0.5 leading-relaxed">
+                All shipment bookings, vendor pushes, and connection tests run in simulated test mode. Realistic mock AWBs are generated without contacting external courier servers or charging real accounts. You can also make direct shipment bookings without selecting any carrier API.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleToggleGlobalTestMode}
+            className="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-colors cursor-pointer flex-shrink-0"
+          >
+            Turn Off Test Mode
+          </button>
+        </div>
+      )}
 
       {/* ─── Main Content ─── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
