@@ -32,6 +32,7 @@ import {
   Send,
   Plus,
   Trash2,
+  Receipt,
   Lock,
   Eye,
   FlaskConical,
